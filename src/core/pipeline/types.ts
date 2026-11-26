@@ -47,6 +47,8 @@ export interface ImageResult {
   ms: number;
   /** True when the image was downscaled to fit memory limits (e.g. after a worker crash). */
   downscaled?: boolean;
+  /** True when a target file size was requested but could not be reached. */
+  targetMissed?: boolean;
 }
 
 export interface Env {

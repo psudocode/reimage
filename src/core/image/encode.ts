@@ -1,15 +1,27 @@
 import { codecs, type CodecId, type CodecRegistry, type RawImage } from '../../codecs/index.ts';
 import type { OutputFormat, OutputSettings } from '../pipeline/types.ts';
+import { resampleBitmap } from './resample.ts';
+import { searchTargetSize } from './targetSize.ts';
 
 /**
  * Output encoder contract: one decoded bitmap in, one encoded Blob out.
  * Encoding happens once, at the end of a pipeline (technical.md §6).
  */
+export interface EncodeResult {
+  blob: Blob;
+  width: number;
+  height: number;
+  /** True when the target-size search had to shrink the image. */
+  downscaled?: boolean;
+  /** False when `targetBytes` could not be reached even after downscaling. */
+  targetMissed?: boolean;
+}
+
 export type Encoder = (
   bitmap: ImageBitmap,
   output: OutputSettings,
   sourceType: string,
-) => Promise<Blob>;
+) => Promise<EncodeResult>;
 
 const MIME_TO_CODEC: Record<string, CodecId> = {
   'image/jpeg': 'jpeg',
@@ -48,22 +60,49 @@ export const readPixelsFromBitmap: ReadPixels = (bitmap, options = {}) => {
   return context.getImageData(0, 0, bitmap.width, bitmap.height);
 };
 
+export type ResizeBitmap = (
+  bitmap: ImageBitmap,
+  width: number,
+  height: number,
+) => Promise<ImageBitmap>;
+
 /**
  * Encoder backed by the lazy-loaded WASM codecs (MozJPEG, OxiPNG, libwebp,
- * libavif). `output.targetBytes` is not handled here: the target-size search
- * belongs to the Compress tool, which calls this repeatedly.
+ * libavif). When `output.targetBytes` is set, searches for the best quality
+ * that fits (see `targetSize.ts`).
  */
 export function createWasmEncoder(
   registry: CodecRegistry = codecs,
   readPixels: ReadPixels = readPixelsFromBitmap,
+  resize: ResizeBitmap = (bitmap, width, height) => resampleBitmap(bitmap, width, height),
 ): Encoder {
   return async (bitmap, output, sourceType) => {
     const codec = registry.get(resolveCodecId(output.format, sourceType));
     // JPEG has no alpha channel: flatten onto white instead of letting
     // transparent pixels turn black.
-    const pixels = readPixels(bitmap, codec.supportsAlpha ? {} : { background: '#ffffff' });
-    const bytes = await codec.encode(pixels, { quality: output.quality });
-    return new Blob([bytes], { type: codec.mimeType });
+    const readOptions = codec.supportsAlpha ? {} : { background: '#ffffff' };
+    const encodeAt = async (source: ImageBitmap, quality: number | undefined) => {
+      const bytes = await codec.encode(readPixels(source, readOptions), { quality });
+      return new Blob([bytes], { type: codec.mimeType });
+    };
+
+    if (output.targetBytes === undefined) {
+      const blob = await encodeAt(bitmap, output.quality);
+      return { blob, width: bitmap.width, height: bitmap.height };
+    }
+
+    const found = await searchTargetSize(bitmap, output.targetBytes, {
+      encode: encodeAt,
+      resize,
+      lossy: codec.lossy,
+    });
+    return {
+      blob: found.blob,
+      width: found.width,
+      height: found.height,
+      ...(found.downscaled ? { downscaled: true } : {}),
+      ...(found.targetMet ? {} : { targetMissed: true }),
+    };
   };
 }
 

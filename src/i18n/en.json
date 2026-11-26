@@ -4,5 +4,21 @@
     "tagline": "Every image tool you need, right in your browser. No uploads, no sign-up, no limits.",
     "privacyBadge": "100% client-side — your images never leave your device",
     "comingSoon": "Phase 0 foundations ready. MVP tools (compress, convert, resize, crop, batch ZIP) are up next."
+  },
+  "tools": {
+    "compress": {
+      "label": "Compress",
+      "description": "Make files smaller. Pick a quality, or set a file size to stay under.",
+      "modeQuality": "Fixed quality",
+      "modeTarget": "Target file size",
+      "quality": "Quality",
+      "qualityHint": "Lower quality means a smaller file.",
+      "targetSize": "Keep each file under (KB)",
+      "targetHint": "We find the best quality that fits. If needed the image is made slightly smaller.",
+      "errors": {
+        "quality": "Quality must be between 1 and 100.",
+        "target": "Target size must be at least 1 KB."
+      }
+    }
   }
 }
