@@ -1,4 +1,5 @@
-import { nativeEncoder, type Encoder } from '../image/encode.ts';
+import { decodeFile } from '../image/decode.ts';
+import { wasmEncoder, type Encoder } from '../image/encode.ts';
 import { fitWithinMaxPixels, resampleBitmap, scaleSize, type Size } from '../image/resample.ts';
 import { exceedsMaxPixels, getMaxPixels } from '../limits.ts';
 import type { ImageResult, Pipeline } from '../pipeline/types.ts';
@@ -144,9 +145,9 @@ export function createBrowserDeps(
   deviceMemoryGb: number,
 ): ProcessDeps {
   return {
-    decode: (file) => createImageBitmap(file, { imageOrientation: 'from-image' }),
+    decode: (file) => decodeFile(file),
     getTool,
-    encode: nativeEncoder,
+    encode: wasmEncoder,
     resample: (input, width, height) => resampleBitmap(input, width, height),
     createCanvas: (width, height) => new OffscreenCanvas(width, height),
     now: () => performance.now(),
