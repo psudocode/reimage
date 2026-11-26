@@ -1,22 +1,24 @@
 import type { Pipeline } from '../../core/pipeline/types.ts';
-import { toOutputSettings, type CompressOptions } from '../../tools/compress/options.ts';
+import { getToolRuntimeById } from '../../tools/runtimeRegistry.ts';
 
 export const FILE_NAME_PATTERN = '{name}-reimage.{ext}';
 
 /**
- * Builds the pipeline for the Compress tool: one (pass-through) step so its
- * options are validated, plus output settings derived from them.
- * Convert, Resize and Crop will add their own builders next to this one.
+ * Builds a one-step pipeline for a tool: the step carries the tool's options (so
+ * they are validated in the worker) and the tool's `toOutput` decides how the
+ * result is encoded. Tools without `toOutput` keep each image's original format.
  */
-export function buildCompressPipeline(options: CompressOptions): Pipeline {
+export function buildPipeline(toolId: string, options: unknown): Pipeline {
+  const tool = getToolRuntimeById(toolId);
+  if (!tool) throw new Error(`Unknown tool "${toolId}"`);
   return {
     version: 1,
-    steps: [{ toolId: 'compress', options }],
+    steps: [{ toolId, options }],
     output: {
       format: 'original',
-      ...toOutputSettings(options),
       stripMetadata: true,
       fileNamePattern: FILE_NAME_PATTERN,
+      ...tool.toOutput?.(options),
     },
   };
 }

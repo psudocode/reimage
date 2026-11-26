@@ -8,25 +8,27 @@
     "imagesTitle": "Images",
     "optionsTitle": "Options",
     "dropTitle": "Drop images here, or click to choose",
-    "dropHint": "JPEG, PNG, WebP or AVIF. Nothing is uploaded.",
+    "dropHint": "JPEG, PNG, WebP, AVIF, or HEIC where your browser supports it. Nothing is uploaded.",
     "empty": "No images yet. Add some to get started.",
-    "skipped": "Skipped {count}: only JPEG, PNG, WebP and AVIF are supported.",
+    "skipped": "Skipped {count}: only JPEG, PNG, WebP, AVIF and HEIC are supported.",
     "count": "{count} in the list",
     "clearAll": "Remove all",
     "remove": "Remove",
-    "run": "Compress",
     "cancel": "Cancel",
     "download": "Download",
     "loading": "Loading options…",
     "smaller": "{percent}% smaller",
-    "notSmaller": "not smaller than the original",
     "targetMissed": "Could not reach the target size.",
     "downscaled": "Made slightly smaller to fit.",
     "summary": "{count} done: {before} → {after} ({percent}%)",
     "status": {
       "processing": "Processing",
       "failed": "Failed"
-    }
+    },
+    "toolsTitle": "Tools",
+    "larger": "{percent}% larger",
+    "sameSize": "same size as the original",
+    "heicUnsupported": "This browser cannot open HEIC photos. Try Safari, or export the photo as JPEG first."
   },
   "tools": {
     "compress": {
@@ -41,6 +43,24 @@
       "errors": {
         "quality": "Quality must be between 1 and 100.",
         "target": "Target size must be at least 1 KB."
+      }
+    },
+    "convert": {
+      "label": "Convert",
+      "description": "Change the file format. Pick the format you need and, for lossy formats, the quality.",
+      "format": "Convert to",
+      "hints": {
+        "jpeg": "Works everywhere. No transparency: transparent areas turn white.",
+        "png": "Lossless and keeps transparency. Files are usually larger.",
+        "webp": "Smaller than JPEG and keeps transparency. Supported by all modern browsers.",
+        "avif": "Smallest files at the same quality, but slower to encode."
+      },
+      "quality": "Quality",
+      "qualityHint": "Lower quality means a smaller file.",
+      "losslessNote": "PNG is lossless, so there is no quality setting.",
+      "errors": {
+        "format": "Choose a format.",
+        "quality": "Quality must be between 1 and 100."
       }
     }
   }

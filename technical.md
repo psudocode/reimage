@@ -208,6 +208,9 @@ export interface ToolRuntime<O> {
   defaults: O;
   validate(options: O): string[]; // [] = valid; else i18n error keys
   run(input: ImageBitmap, options: O, ctx: ToolContext): Promise<ImageBitmap>;
+  // Tools that change how the result is encoded (Compress, Convert) set output
+  // settings here instead of transforming pixels. The pipeline builder merges them.
+  toOutput?(options: O): Partial<Pick<OutputSettings, 'format' | 'quality' | 'targetBytes'>>;
   supports?(env: Env): boolean; // hide when the browser can't do it
 }
 
@@ -253,13 +256,13 @@ Comlink.expose(api);
 
 ## 8. Codecs
 
-| Format | Decode                                         | Encode               | Library                           |
-| ------ | ---------------------------------------------- | -------------------- | --------------------------------- |
-| JPEG   | `createImageBitmap`                            | MozJPEG (WASM)       | `@jsquash/jpeg`                   |
-| PNG    | `createImageBitmap`                            | OxiPNG / UPNG (WASM) | `@jsquash/png`, `@jsquash/oxipng` |
-| WebP   | `createImageBitmap`                            | libwebp (WASM)       | `@jsquash/webp`                   |
-| AVIF   | `createImageBitmap` where supported, else WASM | libavif (WASM)       | `@jsquash/avif`                   |
-| HEIC   | Native where supported (Safari)                | —                    | Feature-detected                  |
+| Format | Decode                                         | Encode               | Library                                |
+| ------ | ---------------------------------------------- | -------------------- | -------------------------------------- |
+| JPEG   | `createImageBitmap`                            | MozJPEG (WASM)       | `@jsquash/jpeg`                        |
+| PNG    | `createImageBitmap`                            | OxiPNG / UPNG (WASM) | `@jsquash/png`, `@jsquash/oxipng`      |
+| WebP   | `createImageBitmap`                            | libwebp (WASM)       | `@jsquash/webp`                        |
+| AVIF   | `createImageBitmap` where supported, else WASM | libavif (WASM)       | `@jsquash/avif`                        |
+| HEIC   | Native where supported (Safari)                | —                    | Attempted; a clear message if it fails |
 
 - Each codec is loaded with dynamic `import()` the first time it's needed, then cached by the service worker.
 - **Target file size mode:** binary search over quality (max 7 iterations, ±3% tolerance). If the target can't be reached at quality 10, the image is downscaled 10% and the search repeats (max 3 times), and the user is told.

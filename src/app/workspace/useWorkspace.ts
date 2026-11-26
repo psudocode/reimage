@@ -10,13 +10,9 @@ import {
 import { JobRunner, type JobEvents, type JobHandle } from '../../core/job/JobRunner.ts';
 import type { InputImage, Job } from '../../core/pipeline/types.ts';
 import { createImagePool } from '../../core/workers/imagePool.ts';
-import {
-  compressDefaults,
-  validateCompress,
-  type CompressOptions,
-} from '../../tools/compress/options.ts';
+import { getRegisteredRuntimes, getToolRuntimeById } from '../../tools/runtimeRegistry.ts';
 import { extensionForMime, outputFileName, splitAcceptedFiles, uniqueFileName } from './files.ts';
-import { buildCompressPipeline } from './pipeline.ts';
+import { buildPipeline } from './pipeline.ts';
 import {
   initialWorkspaceState,
   workspaceReducer,
@@ -56,7 +52,16 @@ function revokeItem(item: WorkspaceItem, deps: WorkspaceDeps) {
 
 export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
   const [state, dispatch] = useReducer(workspaceReducer, initialWorkspaceState);
-  const [options, setOptions] = useState<CompressOptions>(compressDefaults);
+  const [toolId, setToolId] = useState(() => getRegisteredRuntimes()[0]!.id);
+  // Each tool keeps its own options, so switching tabs never loses what was typed.
+  const [optionsByTool, setOptionsByTool] = useState<Record<string, unknown>>(() =>
+    Object.fromEntries(getRegisteredRuntimes().map((tool) => [tool.id, tool.defaults])),
+  );
+  const options = optionsByTool[toolId];
+  const setOptions = useCallback(
+    (next: unknown) => setOptionsByTool((previous) => ({ ...previous, [toolId]: next })),
+    [toolId],
+  );
 
   // Event callbacks and the unmount cleanup need the latest state without re-subscribing.
   // Layout effect, not a passive one: a click right after a commit must see that commit.
@@ -69,7 +74,10 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
   const runnerRef = useRef<WorkspaceRunner | null>(null);
   const handleRef = useRef<JobHandle | null>(null);
 
-  const errors = useMemo(() => validateCompress(options), [options]);
+  const errors = useMemo(
+    () => getToolRuntimeById(toolId)?.validate(options) ?? [],
+    [toolId, options],
+  );
 
   const addFiles = useCallback((files: Iterable<File>) => {
     const { accepted, rejected } = splitAcceptedFiles(files);
@@ -101,13 +109,13 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
 
   const run = useCallback(async () => {
     const { items, running } = stateRef.current;
-    if (running || items.length === 0 || validateCompress(options).length > 0) return;
+    if (running || items.length === 0 || errors.length > 0) return;
     const d = depsRef.current;
 
     // Re-running replaces earlier results: free their blobs now.
     for (const item of items) if (item.result) d.revokeObjectURL(item.result.url);
 
-    const pipeline = buildCompressPipeline(options);
+    const pipeline = buildPipeline(toolId, options);
     const images: InputImage[] = items.map((item) => ({
       id: item.id,
       file: item.file,
@@ -160,7 +168,7 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
       handleRef.current = null;
       dispatch({ type: 'end' });
     }
-  }, [options]);
+  }, [toolId, options, errors]);
 
   const cancel = useCallback(() => handleRef.current?.cancel(), []);
 
@@ -176,5 +184,17 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
     [],
   );
 
-  return { ...state, options, setOptions, errors, addFiles, removeItem, clear, run, cancel };
+  return {
+    ...state,
+    toolId,
+    setToolId,
+    options,
+    setOptions,
+    errors,
+    addFiles,
+    removeItem,
+    clear,
+    run,
+    cancel,
+  };
 }

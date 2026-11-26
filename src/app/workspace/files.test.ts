@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ACCEPT_ATTRIBUTE,
   extensionForMime,
   formatBytes,
+  isHeicFile,
   outputFileName,
   savedPercent,
   splitAcceptedFiles,
@@ -23,6 +25,27 @@ describe('splitAcceptedFiles', () => {
     ]);
     expect(accepted.map((f) => f.name)).toEqual(['a.jpg', 'b.png', 'c.webp', 'd.avif']);
     expect(rejected.map((f) => f.name)).toEqual(['e.gif', 'f.pdf', 'g']);
+  });
+});
+
+describe('HEIC input', () => {
+  it('accepts HEIC/HEIF by MIME type or by extension (Chromium reports no type)', () => {
+    const { accepted, rejected } = splitAcceptedFiles([
+      file('a.heic', 'image/heic'),
+      file('b.HEIF', ''),
+      file('c.heic', 'application/octet-stream'),
+      file('d.heicx', ''),
+      file('e.txt', 'text/plain'),
+    ]);
+    expect(accepted.map((f) => f.name)).toEqual(['a.heic', 'b.HEIF', 'c.heic']);
+    expect(rejected.map((f) => f.name)).toEqual(['d.heicx', 'e.txt']);
+    expect(isHeicFile(file('x.heic', ''))).toBe(true);
+    expect(isHeicFile(file('x.jpg', 'image/jpeg'))).toBe(false);
+  });
+
+  it('lists HEIC in the picker filter', () => {
+    expect(ACCEPT_ATTRIBUTE).toContain('.heic');
+    expect(ACCEPT_ATTRIBUTE).toContain('image/heif');
   });
 });
 
