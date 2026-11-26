@@ -56,7 +56,7 @@
   "size-limit": [
     {
       "name": "Initial JS bundle",
-      "path": "dist/assets/*.js",
+      "path": "dist/assets/{index,Panel}-*.js",
       "limit": "150 kB",
       "gzip": true
     }

@@ -2,8 +2,31 @@
   "app": {
     "name": "reimage",
     "tagline": "Every image tool you need, right in your browser. No uploads, no sign-up, no limits.",
-    "privacyBadge": "100% client-side — your images never leave your device",
-    "comingSoon": "Phase 0 foundations ready. MVP tools (compress, convert, resize, crop, batch ZIP) are up next."
+    "privacyBadge": "100% client-side — your images never leave your device"
+  },
+  "workspace": {
+    "imagesTitle": "Images",
+    "optionsTitle": "Options",
+    "dropTitle": "Drop images here, or click to choose",
+    "dropHint": "JPEG, PNG, WebP or AVIF. Nothing is uploaded.",
+    "empty": "No images yet. Add some to get started.",
+    "skipped": "Skipped {count}: only JPEG, PNG, WebP and AVIF are supported.",
+    "count": "{count} in the list",
+    "clearAll": "Remove all",
+    "remove": "Remove",
+    "run": "Compress",
+    "cancel": "Cancel",
+    "download": "Download",
+    "loading": "Loading options…",
+    "smaller": "{percent}% smaller",
+    "notSmaller": "not smaller than the original",
+    "targetMissed": "Could not reach the target size.",
+    "downscaled": "Made slightly smaller to fit.",
+    "summary": "{count} done: {before} → {after} ({percent}%)",
+    "status": {
+      "processing": "Processing",
+      "failed": "Failed"
+    }
   },
   "tools": {
     "compress": {

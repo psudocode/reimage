@@ -3,12 +3,12 @@ import type { ImageResult, InputImage, Job, JobStatus } from '../pipeline/types.
 import { PoolAbortError, type WorkerPool } from '../workers/pool.ts';
 import type { ImageWorkerApi } from '../workers/image.worker.ts';
 
-/** What the runner needs from a pool: the worker's `process` call, nothing else. */
-export type ImageWorkerPoolLike = WorkerPool<{
-  process: (
-    ...args: Parameters<ImageWorkerApi['process']>
-  ) => ReturnType<ImageWorkerApi['process']>;
-}>;
+/**
+ * What the runner needs from a pool: `run`, nothing else. Using `Pick` keeps the
+ * real `WorkerPool<Remote<ImageWorkerApi>>` assignable (the class itself is
+ * invariant because of its private fields) while tests pass a fake.
+ */
+export type ImageWorkerPoolLike = Pick<WorkerPool<Comlink.Remote<ImageWorkerApi>>, 'run'>;
 
 export interface ImageFailure {
   imageId: string;
