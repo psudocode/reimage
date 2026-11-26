@@ -2,8 +2,31 @@
   "app": {
     "name": "reimage",
     "tagline": "Semua tool gambar yang kamu butuhkan, langsung di browser. Tanpa upload, tanpa daftar, tanpa batas.",
-    "privacyBadge": "100% di browser — gambar tidak pernah meninggalkan perangkatmu",
-    "comingSoon": "Fondasi Phase 0 siap. Tool MVP (kompres, konversi, ubah ukuran, potong, batch ZIP) menyusul berikutnya."
+    "privacyBadge": "100% di browser — gambar tidak pernah meninggalkan perangkatmu"
+  },
+  "workspace": {
+    "imagesTitle": "Gambar",
+    "optionsTitle": "Opsi",
+    "dropTitle": "Letakkan gambar di sini, atau klik untuk memilih",
+    "dropHint": "JPEG, PNG, WebP, atau AVIF. Tidak ada yang diunggah.",
+    "empty": "Belum ada gambar. Tambahkan dulu untuk mulai.",
+    "skipped": "{count} dilewati: hanya JPEG, PNG, WebP, dan AVIF yang didukung.",
+    "count": "{count} dalam daftar",
+    "clearAll": "Hapus semua",
+    "remove": "Hapus",
+    "run": "Kompres",
+    "cancel": "Batal",
+    "download": "Unduh",
+    "loading": "Memuat opsi…",
+    "smaller": "{percent}% lebih kecil",
+    "notSmaller": "tidak lebih kecil dari aslinya",
+    "targetMissed": "Target ukuran tidak tercapai.",
+    "downscaled": "Diperkecil sedikit agar muat.",
+    "summary": "{count} selesai: {before} → {after} ({percent}%)",
+    "status": {
+      "processing": "Memproses",
+      "failed": "Gagal"
+    }
   },
   "tools": {
     "compress": {
