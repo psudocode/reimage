@@ -10,14 +10,14 @@ re-image is a free, open-source image toolkit. It lets you compress, convert, re
 
 ## Why re-image?
 
-| | re-image | Typical online image tools |
-| --- | --- | --- |
-| Where your images go | Stay on your device | Uploaded to a server |
-| Account | Not needed | Often required |
-| Daily or file limits | None (only your device's memory) | Common on free plans |
-| Watermarks | Never | Sometimes |
-| Works offline | Yes (installable app) | No |
-| Batch processing | Yes, with reusable pipelines | Often paid |
+|                      | re-image                         | Typical online image tools |
+| -------------------- | -------------------------------- | -------------------------- |
+| Where your images go | Stay on your device              | Uploaded to a server       |
+| Account              | Not needed                       | Often required             |
+| Daily or file limits | None (only your device's memory) | Common on free plans       |
+| Watermarks           | Never                            | Sometimes                  |
+| Works offline        | Yes (installable app)            | No                         |
+| Batch processing     | Yes, with reusable pipelines     | Often paid                 |
 
 ## Features
 
@@ -88,16 +88,16 @@ pnpm dev          # start the dev server at http://localhost:5173
 
 ### Scripts
 
-| Command | What it does |
-| --- | --- |
-| `pnpm dev` | Start the dev server |
-| `pnpm build` | Build for production into `dist/` |
-| `pnpm preview` | Preview the production build |
-| `pnpm lint` | ESLint + Prettier check |
-| `pnpm typecheck` | TypeScript type check |
-| `pnpm test` | Unit tests (Vitest) |
-| `pnpm test:e2e` | End-to-end, privacy and accessibility tests (Playwright) |
-| `pnpm size` | Check bundle-size budget |
+| Command          | What it does                                             |
+| ---------------- | -------------------------------------------------------- |
+| `pnpm dev`       | Start the dev server                                     |
+| `pnpm build`     | Build for production into `dist/`                        |
+| `pnpm preview`   | Preview the production build                             |
+| `pnpm lint`      | ESLint + Prettier check                                  |
+| `pnpm typecheck` | TypeScript type check                                    |
+| `pnpm test`      | Unit tests (Vitest)                                      |
+| `pnpm test:e2e`  | End-to-end, privacy and accessibility tests (Playwright) |
+| `pnpm size`      | Check bundle-size budget                                 |
 
 ## Tech stack
 
@@ -139,7 +139,7 @@ Adding a new tool is one folder plus one registry line. See [Adding a tool](./te
 
 ## Support the project
 
-re-image is free, and its core tools will stay free. If it saves you time, you can support it via GitHub Sponsors / Ko-fi / Saweria *(links coming soon)*.
+re-image is free, and its core tools will stay free. If it saves you time, you can support it via GitHub Sponsors / Ko-fi / Saweria _(links coming soon)_.
 
 ## License
 

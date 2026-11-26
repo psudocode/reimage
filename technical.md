@@ -35,13 +35,13 @@ re-image is a static single-page app. The UI describes a **job** (images + a pip
 
 ## 1. Goals and constraints
 
-| Goal | Constraint it creates |
-| --- | --- |
-| Private: images never uploaded | All processing client-side, enforced by a CI test |
-| Free to run | Static hosting only, no server compute, no database |
-| Fast on mid-range phones | Work off the main thread; lazy-load codecs; tight JS budget |
-| Batch-first | Concurrency control and memory limits |
-| Easy to extend | Every tool is a plugin with one shared interface |
+| Goal                           | Constraint it creates                                       |
+| ------------------------------ | ----------------------------------------------------------- |
+| Private: images never uploaded | All processing client-side, enforced by a CI test           |
+| Free to run                    | Static hosting only, no server compute, no database         |
+| Fast on mid-range phones       | Work off the main thread; lazy-load codecs; tight JS budget |
+| Batch-first                    | Concurrency control and memory limits                       |
+| Easy to extend                 | Every tool is a plugin with one shared interface            |
 
 **Non-goals:** user accounts, cloud storage, server-side processing, real-time collaboration.
 
@@ -91,22 +91,22 @@ sequenceDiagram
 
 ## 3. Tech stack
 
-| Layer | Choice | Notes |
-| --- | --- | --- |
-| Language | TypeScript (`strict: true`) | Shared types between UI and workers |
-| UI | React 19 + Vite | Svelte is a viable alternative (see Open questions) |
-| Styling | Tailwind CSS + design tokens | Tokens in `src/ui/tokens.ts` |
-| State | Zustand | One store per concern (files, pipeline, jobs, settings) |
-| Geometry ops | Canvas 2D / `OffscreenCanvas` | Crop, resize, rotate, expand, merge |
-| Resampling | `pica` (optional) | Higher-quality downscaling than plain canvas |
-| Codecs | jSquash (`@jsquash/jpeg`, `/png`, `/webp`, `/avif`, `/oxipng`) | WASM, lazy loaded |
-| Worker messaging | Comlink | RPC-style calls to workers |
-| ZIP | fflate | Streams; runs in a worker |
-| Storage | `idb-keyval` | Presets and settings only |
-| PWA | `vite-plugin-pwa` (Workbox) | Precache app shell + codecs |
-| i18n | Paraglide JS (or i18next) | `en`, `id` |
-| Tests | Vitest, Playwright, axe-core | Unit, E2E, accessibility |
-| Hosting | Cloudflare Pages | Free tier; preview deploy per PR |
+| Layer            | Choice                                                         | Notes                                                   |
+| ---------------- | -------------------------------------------------------------- | ------------------------------------------------------- |
+| Language         | TypeScript (`strict: true`)                                    | Shared types between UI and workers                     |
+| UI               | React 19 + Vite                                                | Svelte is a viable alternative (see Open questions)     |
+| Styling          | Tailwind CSS + design tokens                                   | Tokens in `src/ui/tokens.ts`                            |
+| State            | Zustand                                                        | One store per concern (files, pipeline, jobs, settings) |
+| Geometry ops     | Canvas 2D / `OffscreenCanvas`                                  | Crop, resize, rotate, expand, merge                     |
+| Resampling       | `pica` (optional)                                              | Higher-quality downscaling than plain canvas            |
+| Codecs           | jSquash (`@jsquash/jpeg`, `/png`, `/webp`, `/avif`, `/oxipng`) | WASM, lazy loaded                                       |
+| Worker messaging | Comlink                                                        | RPC-style calls to workers                              |
+| ZIP              | fflate                                                         | Streams; runs in a worker                               |
+| Storage          | `idb-keyval`                                                   | Presets and settings only                               |
+| PWA              | `vite-plugin-pwa` (Workbox)                                    | Precache app shell + codecs                             |
+| i18n             | Paraglide JS (or i18next)                                      | `en`, `id`                                              |
+| Tests            | Vitest, Playwright, axe-core                                   | Unit, E2E, accessibility                                |
+| Hosting          | Cloudflare Pages                                               | Free tier; preview deploy per PR                        |
 
 ---
 
@@ -145,25 +145,25 @@ re-image/
 ```ts
 // A file the user added
 interface InputImage {
-  id: string;            // uuid
+  id: string; // uuid
   file: File;
   name: string;
-  size: number;          // bytes
-  width?: number;        // filled after probing
+  size: number; // bytes
+  width?: number; // filled after probing
   height?: number;
 }
 
 // One step in a pipeline
 interface PipelineStep<O = unknown> {
-  toolId: string;        // 'resize'
+  toolId: string; // 'resize'
   options: O;
 }
 
 // The output settings applied after all steps
 interface OutputSettings {
   format: 'jpeg' | 'png' | 'webp' | 'avif' | 'original';
-  quality?: number;      // 0–100
-  targetBytes?: number;  // e.g. 200_000 → binary search on quality
+  quality?: number; // 0–100
+  targetBytes?: number; // e.g. 200_000 → binary search on quality
   stripMetadata: boolean;
   fileNamePattern: string; // '{name}-reimage.{ext}'
 }
@@ -202,19 +202,19 @@ Every tool implements one interface:
 
 ```ts
 export interface ImageTool<O> {
-  id: string;                         // unique, kebab-case
-  labelKey: string;                   // i18n key
+  id: string; // unique, kebab-case
+  labelKey: string; // i18n key
   icon: string;
   defaults: O;
-  validate(options: O): string[];     // [] = valid; else i18n error keys
+  validate(options: O): string[]; // [] = valid; else i18n error keys
   run(input: ImageBitmap, options: O, ctx: ToolContext): Promise<ImageBitmap>;
-  Panel: React.FC<{ value: O; onChange(o: O): void }>;  // main thread only
-  supports?(env: Env): boolean;       // hide when the browser can't do it
+  Panel: React.FC<{ value: O; onChange(o: O): void }>; // main thread only
+  supports?(env: Env): boolean; // hide when the browser can't do it
 }
 
 export interface ToolContext {
-  signal: AbortSignal;                // cancellation
-  progress(fraction: number): void;   // 0..1
+  signal: AbortSignal; // cancellation
+  progress(fraction: number): void; // 0..1
   createCanvas(w: number, h: number): OffscreenCanvas;
 }
 ```
@@ -246,13 +246,13 @@ Comlink.expose(api);
 
 ## 8. Codecs
 
-| Format | Decode | Encode | Library |
-| --- | --- | --- | --- |
-| JPEG | `createImageBitmap` | MozJPEG (WASM) | `@jsquash/jpeg` |
-| PNG | `createImageBitmap` | OxiPNG / UPNG (WASM) | `@jsquash/png`, `@jsquash/oxipng` |
-| WebP | `createImageBitmap` | libwebp (WASM) | `@jsquash/webp` |
-| AVIF | `createImageBitmap` where supported, else WASM | libavif (WASM) | `@jsquash/avif` |
-| HEIC | Native where supported (Safari) | — | Feature-detected |
+| Format | Decode                                         | Encode               | Library                           |
+| ------ | ---------------------------------------------- | -------------------- | --------------------------------- |
+| JPEG   | `createImageBitmap`                            | MozJPEG (WASM)       | `@jsquash/jpeg`                   |
+| PNG    | `createImageBitmap`                            | OxiPNG / UPNG (WASM) | `@jsquash/png`, `@jsquash/oxipng` |
+| WebP   | `createImageBitmap`                            | libwebp (WASM)       | `@jsquash/webp`                   |
+| AVIF   | `createImageBitmap` where supported, else WASM | libavif (WASM)       | `@jsquash/avif`                   |
+| HEIC   | Native where supported (Safari)                | —                    | Feature-detected                  |
 
 - Each codec is loaded with dynamic `import()` the first time it's needed, then cached by the service worker.
 - **Target file size mode:** binary search over quality (max 7 iterations, ±3% tolerance). If the target can't be reached at quality 10, the image is downscaled 10% and the search repeats (max 3 times), and the user is told.
@@ -265,14 +265,14 @@ Comlink.expose(api);
 
 Phones are the bottleneck. These are the guards:
 
-| Guard | Default | Behaviour |
-| --- | --- | --- |
-| Max pixels per image | 50 MP (25 MP when `deviceMemory <= 4`) | Warn; offer to downscale on load |
-| Max concurrent decodes | Pool size | Back-pressure via queue |
-| Free bitmaps eagerly | Always | `bitmap.close()` after each step |
-| Result storage | Blobs, not bitmaps | Small memory footprint while waiting for ZIP |
-| Large batches | > 200 files | Stream into the ZIP in chunks instead of holding all results |
-| Object URLs | Revoked on removal | Prevents preview leaks |
+| Guard                  | Default                                | Behaviour                                                    |
+| ---------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| Max pixels per image   | 50 MP (25 MP when `deviceMemory <= 4`) | Warn; offer to downscale on load                             |
+| Max concurrent decodes | Pool size                              | Back-pressure via queue                                      |
+| Free bitmaps eagerly   | Always                                 | `bitmap.close()` after each step                             |
+| Result storage         | Blobs, not bitmaps                     | Small memory footprint while waiting for ZIP                 |
+| Large batches          | > 200 files                            | Stream into the ZIP in chunks instead of holding all results |
+| Object URLs            | Revoked on removal                     | Prevents preview leaks                                       |
 
 ---
 
@@ -314,15 +314,15 @@ Phones are the bottleneck. These are the guards:
 
 ## 14. Testing strategy
 
-| Level | Tool | What |
-| --- | --- | --- |
-| Unit | Vitest | Each plugin's `validate` and `run` on fixture images (dimensions, byte ranges) |
-| Golden images | Vitest + pixelmatch | Visual diff against reference outputs, small tolerance |
-| Component | Vitest + Testing Library | Panels, file drop, progress |
-| End-to-end | Playwright (Chromium, Firefox, WebKit) | Each MVP flow: add files → run → download ZIP |
-| Privacy | Playwright request interception | Fails if any request body contains image bytes or goes to a non-allowlisted host |
-| Accessibility | axe-core in Playwright | No serious/critical violations on every page |
-| Performance | Lighthouse CI | Budgets below |
+| Level         | Tool                                   | What                                                                             |
+| ------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
+| Unit          | Vitest                                 | Each plugin's `validate` and `run` on fixture images (dimensions, byte ranges)   |
+| Golden images | Vitest + pixelmatch                    | Visual diff against reference outputs, small tolerance                           |
+| Component     | Vitest + Testing Library               | Panels, file drop, progress                                                      |
+| End-to-end    | Playwright (Chromium, Firefox, WebKit) | Each MVP flow: add files → run → download ZIP                                    |
+| Privacy       | Playwright request interception        | Fails if any request body contains image bytes or goes to a non-allowlisted host |
+| Accessibility | axe-core in Playwright                 | No serious/critical violations on every page                                     |
+| Performance   | Lighthouse CI                          | Budgets below                                                                    |
 
 Fixtures live in `e2e/fixtures/`: small JPG/PNG/WebP files, a large 40 MP JPEG, a rotated EXIF photo and a transparent PNG.
 
@@ -351,13 +351,13 @@ flowchart LR
 
 ## 16. Performance budgets
 
-| Metric | Budget | Enforced by |
-| --- | --- | --- |
-| Initial JS (gzipped, excluding codecs) | ≤ 150 KB | `size-limit` in CI |
-| Largest Contentful Paint (mobile, 4G) | ≤ 2.0 s | Lighthouse CI |
-| Lighthouse Performance / Accessibility (mobile) | ≥ 90 / ≥ 90 | Lighthouse CI |
-| Main-thread long tasks during a batch | None > 50 ms | Manual profiling checklist per release |
-| Compress 20 × 12 MP JPEGs (mid-range laptop) | Track and keep a trend | Benchmark script `pnpm bench` |
+| Metric                                          | Budget                 | Enforced by                            |
+| ----------------------------------------------- | ---------------------- | -------------------------------------- |
+| Initial JS (gzipped, excluding codecs)          | ≤ 150 KB               | `size-limit` in CI                     |
+| Largest Contentful Paint (mobile, 4G)           | ≤ 2.0 s                | Lighthouse CI                          |
+| Lighthouse Performance / Accessibility (mobile) | ≥ 90 / ≥ 90            | Lighthouse CI                          |
+| Main-thread long tasks during a batch           | None > 50 ms           | Manual profiling checklist per release |
+| Compress 20 × 12 MP JPEGs (mid-range laptop)    | Track and keep a trend | Benchmark script `pnpm bench`          |
 
 ---
 
@@ -374,11 +374,11 @@ flowchart LR
 
 ## 18. Observability
 
-| Concern | Tool | Collected | Never collected |
-| --- | --- | --- | --- |
-| Usage | Cloudflare Web Analytics or Umami | Page views, tool used, image count, install event | File names, image data, IP addresses stored |
-| Errors | Sentry (free tier) | Stack trace, browser, tool id | File names, image data (scrubbed in `beforeSend`) |
-| Uptime | UptimeRobot / Better Stack | Homepage status | — |
+| Concern | Tool                              | Collected                                         | Never collected                                   |
+| ------- | --------------------------------- | ------------------------------------------------- | ------------------------------------------------- |
+| Usage   | Cloudflare Web Analytics or Umami | Page views, tool used, image count, install event | File names, image data, IP addresses stored       |
+| Errors  | Sentry (free tier)                | Stack trace, browser, tool id                     | File names, image data (scrubbed in `beforeSend`) |
+| Uptime  | UptimeRobot / Better Stack        | Homepage status                                   | —                                                 |
 
 ---
 
@@ -427,8 +427,13 @@ export const flip: ImageTool<FlipOptions> = {
   async run(input, { axis }, ctx) {
     const c = ctx.createCanvas(input.width, input.height);
     const g = c.getContext('2d')!;
-    if (axis === 'horizontal') { g.translate(input.width, 0); g.scale(-1, 1); }
-    else { g.translate(0, input.height); g.scale(1, -1); }
+    if (axis === 'horizontal') {
+      g.translate(input.width, 0);
+      g.scale(-1, 1);
+    } else {
+      g.translate(0, input.height);
+      g.scale(1, -1);
+    }
     g.drawImage(input, 0, 0);
     input.close();
     return c.transferToImageBitmap();
@@ -443,16 +448,16 @@ export const flip: ImageTool<FlipOptions> = {
 
 ADRs live in `docs/adr/NNN-title.md` and use this template: **Context · Decision · Consequences · Status**.
 
-| ADR | Decision | Status |
-| --- | --- | --- |
-| 001 | No backend; all processing in the browser | Accepted |
-| 002 | WASM codecs instead of Canvas-only encoding | Accepted |
+| ADR | Decision                                             | Status   |
+| --- | ---------------------------------------------------- | -------- |
+| 001 | No backend; all processing in the browser            | Accepted |
+| 002 | WASM codecs instead of Canvas-only encoding          | Accepted |
 | 003 | Worker pool sized to cores (max 4) and device memory | Accepted |
-| 004 | Plugin interface for every tool | Accepted |
-| 005 | Lazy-load each codec on first use | Accepted |
-| 006 | IndexedDB for presets only, never images | Accepted |
-| 007 | Output encoding as a final stage, not a tool step | Accepted |
-| 008 | Pipelines as versioned JSON, shareable by URL | Proposed |
+| 004 | Plugin interface for every tool                      | Accepted |
+| 005 | Lazy-load each codec on first use                    | Accepted |
+| 006 | IndexedDB for presets only, never images             | Accepted |
+| 007 | Output encoding as a final stage, not a tool step    | Accepted |
+| 008 | Pipelines as versioned JSON, shareable by URL        | Proposed |
 
 ---
 

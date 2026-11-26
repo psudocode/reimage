@@ -1,0 +1,8 @@
+{
+  "app": {
+    "name": "reimage",
+    "tagline": "Every image tool you need, right in your browser. No uploads, no sign-up, no limits.",
+    "privacyBadge": "100% client-side — your images never leave your device",
+    "comingSoon": "Phase 0 foundations ready. MVP tools (compress, convert, resize, crop, batch ZIP) are up next."
+  }
+}
