@@ -45,6 +45,8 @@ export interface ImageResult {
   bytesBefore: number;
   bytesAfter: number;
   ms: number;
+  /** True when the image was downscaled to fit memory limits (e.g. after a worker crash). */
+  downscaled?: boolean;
 }
 
 export interface Env {
