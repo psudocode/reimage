@@ -11,7 +11,7 @@
 ## Phase 1: MVP
 
 - [x] Worker pool (`Comlink`) + `JobRunner` + `pica` resampling helper
-- [ ] Lazy-loaded WASM codecs (`@jsquash/jpeg`, `/png`, `/oxipng`, `/webp`, `/avif`)
+- [x] Lazy-loaded WASM codecs (`@jsquash/jpeg`, `/png`, `/oxipng`, `/webp`, `/avif`)
 - [ ] **Compress** tool (quality slider + target file size binary search)
 - [ ] **Convert** tool (JPG, PNG, WebP, AVIF; HEIC input where supported)
 - [ ] **Resize** tool (pixels, percentage, presets)
