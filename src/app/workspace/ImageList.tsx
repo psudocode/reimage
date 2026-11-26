@@ -1,5 +1,5 @@
 import { useT } from '../../i18n/index.ts';
-import { formatBytes, savedPercent } from './files.ts';
+import { formatBytes, isHeicFile, savedPercent } from './files.ts';
 import type { WorkspaceItem } from './state.ts';
 
 interface ImageListProps {
@@ -13,7 +13,8 @@ function ItemStatusText({ item }: { item: WorkspaceItem }) {
   if (item.status === 'failed') {
     return (
       <p role="alert" className="text-xs text-red-400">
-        {t('workspace.status.failed')}: {item.error}
+        {t('workspace.status.failed')}:{' '}
+        {isHeicFile(item.file) ? t('workspace.heicUnsupported') : item.error}
       </p>
     );
   }
@@ -25,7 +26,9 @@ function ItemStatusText({ item }: { item: WorkspaceItem }) {
           {formatBytes(item.size)} → {formatBytes(item.result.bytesAfter)} ·{' '}
           {percent > 0
             ? t('workspace.smaller').replace('{percent}', String(percent))
-            : t('workspace.notSmaller')}
+            : percent < 0
+              ? t('workspace.larger').replace('{percent}', String(-percent))
+              : t('workspace.sameSize')}
         </p>
         {item.result.targetMissed && (
           <p className="text-amber-400">{t('workspace.targetMissed')}</p>

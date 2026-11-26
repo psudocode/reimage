@@ -1,6 +1,6 @@
 import { Suspense, useState } from 'react';
 import { useT } from '../../i18n/index.ts';
-import { getToolUIById } from '../../tools/uiRegistry.ts';
+import { getRegisteredUIs, getToolUIById } from '../../tools/uiRegistry.ts';
 import { Dropzone } from './Dropzone.tsx';
 import { formatBytes, savedPercent } from './files.ts';
 import { ImageList } from './ImageList.tsx';
@@ -9,9 +9,10 @@ import { browserWorkspaceDeps, useWorkspace, type WorkspaceDeps } from './useWor
 export function Workspace({ deps = browserWorkspaceDeps }: { deps?: WorkspaceDeps }) {
   const t = useT();
   const workspace = useWorkspace(deps);
-  const { items, running, options, errors } = workspace;
+  const { items, running, toolId, options, errors } = workspace;
   const [skipped, setSkipped] = useState(0);
-  const tool = getToolUIById('compress')!;
+  const tabs = getRegisteredUIs();
+  const tool = getToolUIById(toolId)!;
   const Panel = tool.Panel;
 
   const handleFiles = (files: File[]) => {
@@ -57,10 +58,39 @@ export function Workspace({ deps = browserWorkspaceDeps }: { deps?: WorkspaceDep
         aria-label={t('workspace.optionsTitle')}
         className="h-fit space-y-5 rounded-xl border border-slate-800 bg-slate-900/60 p-4"
       >
-        <h2 className="text-lg font-semibold">{t(tool.labelKey)}</h2>
-        <Suspense fallback={<p className="text-sm text-slate-400">{t('workspace.loading')}</p>}>
-          <Panel value={options} onChange={workspace.setOptions} />
-        </Suspense>
+        <div
+          role="tablist"
+          aria-label={t('workspace.toolsTitle')}
+          className="flex gap-1 rounded-lg bg-slate-950 p-1"
+        >
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              id={`tab-${tab.id}`}
+              aria-selected={tab.id === toolId}
+              aria-controls="tool-panel"
+              disabled={running}
+              onClick={() => workspace.setToolId(tab.id)}
+              className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed ${
+                tab.id === toolId
+                  ? 'bg-slate-800 text-white'
+                  : 'text-slate-400 hover:text-slate-100 disabled:hover:text-slate-400'
+              }`}
+            >
+              {t(tab.labelKey)}
+            </button>
+          ))}
+        </div>
+        <div id="tool-panel" role="tabpanel" aria-labelledby={`tab-${toolId}`}>
+          <Suspense
+            key={toolId}
+            fallback={<p className="text-sm text-slate-400">{t('workspace.loading')}</p>}
+          >
+            <Panel value={options} onChange={workspace.setOptions} />
+          </Suspense>
+        </div>
 
         {running ? (
           <button
@@ -77,7 +107,7 @@ export function Workspace({ deps = browserWorkspaceDeps }: { deps?: WorkspaceDep
             disabled={items.length === 0 || errors.length > 0}
             className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-blue-600"
           >
-            {t('workspace.run')}
+            {t(tool.labelKey)}
           </button>
         )}
 

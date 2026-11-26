@@ -164,7 +164,7 @@ describe('Workspace', () => {
       );
       harness.finish('done');
     });
-    expect(await screen.findByText(/not smaller than the original/)).toBeInTheDocument();
+    expect(await screen.findByText(/20% larger/)).toBeInTheDocument();
     expect(screen.getByText('Could not reach the target size.')).toBeInTheDocument();
     expect(screen.getByText('Made slightly smaller to fit.')).toBeInTheDocument();
   });
@@ -255,11 +255,122 @@ describe('Workspace', () => {
     act(() => harness.finish('done'));
   });
 
+  it('shows one tab per tool and starts on Compress', async () => {
+    setup();
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+      'Compress',
+      'Convert',
+    ]);
+    expect(screen.getByRole('tab', { name: 'Compress' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('converts with the chosen format and quality', async () => {
+    const { harness, add } = setup();
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    add(image('a.png', 'image/png'));
+    fireEvent.click(screen.getByRole('tab', { name: 'Convert' }));
+    fireEvent.click(await screen.findByRole('radio', { name: 'AVIF' }));
+    fireEvent.change(screen.getByLabelText('Quality'), { target: { value: '60' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Convert' }));
+
+    const job = harness.jobs[0]!;
+    expect(job.pipeline.steps[0]).toMatchObject({
+      toolId: 'convert',
+      options: { format: 'avif', quality: 60 },
+    });
+    expect(job.pipeline.output).toMatchObject({ format: 'avif', quality: 60 });
+    expect(job.pipeline.output.targetBytes).toBeUndefined();
+
+    const id = job.images[0]!.id;
+    act(() => {
+      harness.events[0]!.onResult?.(
+        imageResult(id, 400, { blob: new Blob(['x'], { type: 'image/avif' }) }),
+      );
+      harness.finish('done');
+    });
+    const link = await screen.findByRole('link', { name: /Download/ });
+    expect(link).toHaveAttribute('download', 'a-reimage.avif');
+  });
+
+  it('hides the quality slider and sends no quality for PNG', async () => {
+    const { harness, add } = setup();
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    add(image('a.jpg'));
+    fireEvent.click(screen.getByRole('tab', { name: 'Convert' }));
+    fireEvent.click(await screen.findByRole('radio', { name: 'PNG' }));
+    expect(screen.queryByLabelText('Quality')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Convert' }));
+    expect(harness.jobs[0]!.pipeline.output).toMatchObject({ format: 'png' });
+    expect(harness.jobs[0]!.pipeline.output.quality).toBeUndefined();
+  });
+
+  it('keeps the options of each tool when switching tabs', async () => {
+    setup();
+    await screen.findByRole('radio', { name: /Target file size/ });
+    fireEvent.click(screen.getByRole('radio', { name: /Target file size/ }));
+    fireEvent.change(screen.getByLabelText(/Keep each file under/), { target: { value: '321' } });
+    fireEvent.click(screen.getByRole('tab', { name: 'Convert' }));
+    fireEvent.click(await screen.findByRole('radio', { name: 'JPEG' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Compress' }));
+    expect(await screen.findByLabelText(/Keep each file under/)).toHaveValue(321);
+    fireEvent.click(screen.getByRole('tab', { name: 'Convert' }));
+    expect(await screen.findByRole('radio', { name: 'JPEG' })).toBeChecked();
+  });
+
+  it('locks the tabs while a job runs', async () => {
+    const { harness, add } = setup();
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    add(image('a.jpg'));
+    fireEvent.click(screen.getByRole('button', { name: 'Compress' }));
+    expect(screen.getByRole('tab', { name: 'Convert' })).toBeDisabled();
+    act(() => harness.finish('done'));
+    expect(await screen.findByRole('tab', { name: 'Convert' })).toBeEnabled();
+  });
+
+  it('accepts HEIC photos and explains when the browser cannot open one', async () => {
+    const { harness, add } = setup();
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    add(image('IMG_0001.HEIC', ''), image('other.heif', 'image/heif'));
+    expect(screen.getByText('IMG_0001.HEIC')).toBeInTheDocument();
+    expect(screen.getByText('other.heif')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Compress' }));
+    const [first] = harness.jobs[0]!.images;
+    act(() => {
+      harness.events[0]!.onFailure?.({
+        imageId: first!.id,
+        error: new Error('The source image could not be decoded.'),
+      });
+      harness.finish('done');
+    });
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Failed: This browser cannot open HEIC photos.',
+    );
+  });
+
+  it('reports a same-size result', async () => {
+    const { harness, add } = setup();
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    add(image('a.jpg'));
+    fireEvent.click(screen.getByRole('button', { name: 'Compress' }));
+    const id = harness.jobs[0]!.images[0]!.id;
+    act(() => {
+      harness.events[0]!.onResult?.(imageResult(id, 1000));
+      harness.finish('done');
+    });
+    expect(await screen.findByText(/same size as the original/)).toBeInTheDocument();
+  });
+
   it('localises the workspace', async () => {
     setup('id');
     expect(await screen.findByRole('button', { name: 'Kompres' })).toBeDisabled();
     expect(screen.getByText(/Belum ada gambar/)).toBeInTheDocument();
     const aside = screen.getByRole('complementary', { name: 'Opsi' });
-    expect(within(aside).getByRole('heading', { name: 'Kompres' })).toBeInTheDocument();
+    expect(within(aside).getByRole('tab', { name: 'Kompres' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    expect(within(aside).getByRole('tab', { name: 'Konversi' })).toBeInTheDocument();
   });
 });

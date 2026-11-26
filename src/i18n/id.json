@@ -8,25 +8,27 @@
     "imagesTitle": "Gambar",
     "optionsTitle": "Opsi",
     "dropTitle": "Letakkan gambar di sini, atau klik untuk memilih",
-    "dropHint": "JPEG, PNG, WebP, atau AVIF. Tidak ada yang diunggah.",
+    "dropHint": "JPEG, PNG, WebP, AVIF, atau HEIC jika browser mendukung. Tidak ada yang diunggah.",
     "empty": "Belum ada gambar. Tambahkan dulu untuk mulai.",
-    "skipped": "{count} dilewati: hanya JPEG, PNG, WebP, dan AVIF yang didukung.",
+    "skipped": "{count} dilewati: hanya JPEG, PNG, WebP, AVIF, dan HEIC yang didukung.",
     "count": "{count} dalam daftar",
     "clearAll": "Hapus semua",
     "remove": "Hapus",
-    "run": "Kompres",
     "cancel": "Batal",
     "download": "Unduh",
     "loading": "Memuat opsi…",
     "smaller": "{percent}% lebih kecil",
-    "notSmaller": "tidak lebih kecil dari aslinya",
     "targetMissed": "Target ukuran tidak tercapai.",
     "downscaled": "Diperkecil sedikit agar muat.",
     "summary": "{count} selesai: {before} → {after} ({percent}%)",
     "status": {
       "processing": "Memproses",
       "failed": "Gagal"
-    }
+    },
+    "toolsTitle": "Tool",
+    "larger": "{percent}% lebih besar",
+    "sameSize": "sama besar dengan aslinya",
+    "heicUnsupported": "Browser ini tidak bisa membuka foto HEIC. Coba Safari, atau ekspor fotonya ke JPEG dulu."
   },
   "tools": {
     "compress": {
@@ -41,6 +43,24 @@
       "errors": {
         "quality": "Kualitas harus antara 1 dan 100.",
         "target": "Target ukuran minimal 1 KB."
+      }
+    },
+    "convert": {
+      "label": "Konversi",
+      "description": "Ubah format file. Pilih format yang dibutuhkan dan, untuk format lossy, kualitasnya.",
+      "format": "Ubah ke",
+      "hints": {
+        "jpeg": "Jalan di mana-mana. Tanpa transparansi: area transparan jadi putih.",
+        "png": "Lossless dan mempertahankan transparansi. File biasanya lebih besar.",
+        "webp": "Lebih kecil dari JPEG dan mempertahankan transparansi. Didukung semua browser modern.",
+        "avif": "File paling kecil di kualitas yang sama, tapi proses encode lebih lambat."
+      },
+      "quality": "Kualitas",
+      "qualityHint": "Kualitas lebih rendah berarti file lebih kecil.",
+      "losslessNote": "PNG itu lossless, jadi tidak ada pengaturan kualitas.",
+      "errors": {
+        "format": "Pilih format.",
+        "quality": "Kualitas harus antara 1 dan 100."
       }
     }
   }

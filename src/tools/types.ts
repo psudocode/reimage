@@ -1,11 +1,14 @@
 import type { ComponentType } from 'react';
-import type { Env } from '../core/pipeline/types.ts';
+import type { Env, OutputSettings } from '../core/pipeline/types.ts';
 
 export interface ToolContext {
   signal: AbortSignal;
   progress(fraction: number): void;
   createCanvas(width: number, height: number): OffscreenCanvas;
 }
+
+/** Output settings a tool may set. The pipeline builder merges them over the defaults. */
+export type OutputOverrides = Partial<Pick<OutputSettings, 'format' | 'quality' | 'targetBytes'>>;
 
 export interface ToolPanelProps<O> {
   value: O;
@@ -26,6 +29,11 @@ export interface ToolRuntime<O = unknown> {
   validate(options: O): string[];
   run(input: ImageBitmap, options: O, ctx: ToolContext): Promise<ImageBitmap>;
   runMany?(inputs: ImageBitmap[], options: O, ctx: ToolContext): Promise<ImageBitmap>;
+  /**
+   * Encoding happens once at the end of a pipeline (technical.md §6), so tools
+   * like Compress and Convert change the *output settings* instead of the pixels.
+   */
+  toOutput?(options: O): OutputOverrides;
   /** Hide the tool when the browser can't do it. */
   supports?(env: Env): boolean;
 }

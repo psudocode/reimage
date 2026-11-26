@@ -1,5 +1,10 @@
 import type { ToolRuntime } from '../types.ts';
-import { compressDefaults, validateCompress, type CompressOptions } from './options.ts';
+import {
+  compressDefaults,
+  toOutputSettings,
+  validateCompress,
+  type CompressOptions,
+} from './options.ts';
 
 /**
  * Compress, worker side. Quality / target-size encoding itself happens at the
@@ -11,6 +16,7 @@ export const compressRuntime: ToolRuntime<CompressOptions> = {
   id: 'compress',
   defaults: compressDefaults,
   validate: validateCompress,
+  toOutput: toOutputSettings,
   async run(input, _options, ctx) {
     ctx.progress(1);
     return input;

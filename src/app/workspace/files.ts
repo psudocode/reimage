@@ -1,7 +1,22 @@
 /** Formats the encoder can read and write today (technical.md §8). */
 export const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const;
 
-export const ACCEPT_ATTRIBUTE = ACCEPTED_MIME_TYPES.join(',');
+const HEIC_MIME_TYPES = ['image/heic', 'image/heif'] as const;
+
+/**
+ * HEIC/HEIF is input-only and decoded natively where the browser can (Safari);
+ * there is no way to know up front. Chromium often reports an empty MIME type
+ * for `.heic`, so the extension counts too.
+ */
+export function isHeicFile(file: Pick<File, 'name' | 'type'>): boolean {
+  return (
+    (HEIC_MIME_TYPES as readonly string[]).includes(file.type) || /\.(heic|heif)$/i.test(file.name)
+  );
+}
+
+export const ACCEPT_ATTRIBUTE = [...ACCEPTED_MIME_TYPES, ...HEIC_MIME_TYPES, '.heic', '.heif'].join(
+  ',',
+);
 
 export interface SplitFiles {
   accepted: File[];
@@ -13,8 +28,9 @@ export function splitAcceptedFiles(files: Iterable<File>): SplitFiles {
   const accepted: File[] = [];
   const rejected: File[] = [];
   for (const file of files) {
-    if ((ACCEPTED_MIME_TYPES as readonly string[]).includes(file.type)) accepted.push(file);
-    else rejected.push(file);
+    if ((ACCEPTED_MIME_TYPES as readonly string[]).includes(file.type) || isHeicFile(file)) {
+      accepted.push(file);
+    } else rejected.push(file);
   }
   return { accepted, rejected };
 }
