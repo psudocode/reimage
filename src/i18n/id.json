@@ -4,5 +4,21 @@
     "tagline": "Semua tool gambar yang kamu butuhkan, langsung di browser. Tanpa upload, tanpa daftar, tanpa batas.",
     "privacyBadge": "100% di browser — gambar tidak pernah meninggalkan perangkatmu",
     "comingSoon": "Fondasi Phase 0 siap. Tool MVP (kompres, konversi, ubah ukuran, potong, batch ZIP) menyusul berikutnya."
+  },
+  "tools": {
+    "compress": {
+      "label": "Kompres",
+      "description": "Perkecil ukuran file. Pilih kualitas, atau tentukan batas ukuran file.",
+      "modeQuality": "Kualitas tetap",
+      "modeTarget": "Target ukuran file",
+      "quality": "Kualitas",
+      "qualityHint": "Kualitas lebih rendah berarti file lebih kecil.",
+      "targetSize": "Jaga tiap file di bawah (KB)",
+      "targetHint": "Kami cari kualitas terbaik yang muat. Kalau perlu, gambar diperkecil sedikit.",
+      "errors": {
+        "quality": "Kualitas harus antara 1 dan 100.",
+        "target": "Target ukuran minimal 1 KB."
+      }
+    }
   }
 }

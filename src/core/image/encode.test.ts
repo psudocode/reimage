@@ -66,11 +66,13 @@ describe('resolveCodecId', () => {
 describe('createWasmEncoder', () => {
   it('encodes with the chosen codec and tags the Blob with its mime type', async () => {
     const { codecs, encoder, bitmap, pixels } = setup();
-    const blob = await encoder(bitmap, output({ format: 'webp', quality: 42 }), 'image/jpeg');
+    const result = await encoder(bitmap, output({ format: 'webp', quality: 42 }), 'image/jpeg');
 
     expect(codecs.webp.encode).toHaveBeenCalledWith(pixels, { quality: 42 });
-    expect(blob.type).toBe('image/webp');
-    expect(blob.size).toBe(4);
+    expect(result.blob.type).toBe('image/webp');
+    expect(result.blob.size).toBe(4);
+    expect(result).toMatchObject({ width: 1, height: 1 });
+    expect(result.downscaled).toBeUndefined();
     expect(codecs.jpeg.encode).not.toHaveBeenCalled();
   });
 
@@ -99,5 +101,25 @@ describe('createWasmEncoder', () => {
     await expect(encoder(bitmap, output({ format: 'avif' }), 'image/png')).rejects.toThrow(
       'avif oom',
     );
+  });
+
+  it('runs the target-size search when targetBytes is set', async () => {
+    const { codecs, encoder, bitmap } = setup();
+    // 4-byte output is already under a 1000-byte target: one encode at max quality.
+    const result = await encoder(
+      bitmap,
+      output({ format: 'webp', targetBytes: 1000 }),
+      'image/png',
+    );
+    expect(codecs.webp.encode).toHaveBeenCalledTimes(1);
+    expect(codecs.webp.encode).toHaveBeenCalledWith(expect.anything(), { quality: 100 });
+    expect(result.targetMissed).toBeUndefined();
+  });
+
+  it('reports targetMissed when the target is unreachable', async () => {
+    const { codecs, encoder, bitmap } = setup();
+    vi.mocked(codecs.webp.encode).mockImplementation(async () => new ArrayBuffer(500));
+    const result = await encoder(bitmap, output({ format: 'webp', targetBytes: 10 }), 'image/png');
+    expect(result.targetMissed).toBe(true);
   });
 });

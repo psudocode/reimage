@@ -12,7 +12,7 @@
 
 - [x] Worker pool (`Comlink`) + `JobRunner` + `pica` resampling helper
 - [x] Lazy-loaded WASM codecs (`@jsquash/jpeg`, `/png`, `/oxipng`, `/webp`, `/avif`)
-- [ ] **Compress** tool (quality slider + target file size binary search)
+- [x] **Compress** tool (quality slider + target file size binary search)
 - [ ] **Convert** tool (JPG, PNG, WebP, AVIF; HEIC input where supported)
 - [ ] **Resize** tool (pixels, percentage, presets)
 - [ ] **Crop** tool (free crop + fixed ratio presets)

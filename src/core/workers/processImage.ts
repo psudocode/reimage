@@ -121,18 +121,19 @@ export async function processImage(
       onProgress((index + 1) / (stepCount + 1));
     }
 
-    const blob = await deps.encode(current, pipeline.output, file.type);
+    const encoded = await deps.encode(current, pipeline.output, file.type);
     onProgress(1);
 
     return {
       imageId,
-      blob,
-      width: current.width,
-      height: current.height,
+      blob: encoded.blob,
+      width: encoded.width,
+      height: encoded.height,
       bytesBefore: file.size,
-      bytesAfter: blob.size,
+      bytesAfter: encoded.blob.size,
       ms: deps.now() - started,
-      ...(downscaled ? { downscaled: true } : {}),
+      ...(downscaled || encoded.downscaled ? { downscaled: true } : {}),
+      ...(encoded.targetMissed ? { targetMissed: true } : {}),
     };
   } finally {
     current.close();

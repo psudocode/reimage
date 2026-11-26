@@ -45,7 +45,11 @@ function makeDeps(overrides: Partial<ProcessDeps> = {}) {
   const deps: ProcessDeps = {
     decode: vi.fn(async () => decoded),
     getTool: vi.fn(() => undefined),
-    encode: vi.fn(async () => encoded),
+    encode: vi.fn(async (bitmap: ImageBitmap) => ({
+      blob: encoded,
+      width: bitmap.width,
+      height: bitmap.height,
+    })),
     resample: vi.fn(async (_input, width, height) => bitmap(width, height)),
     createCanvas: vi.fn(),
     now: () => (clock += 5),
@@ -228,5 +232,23 @@ describe('processImage', () => {
     expect(values.every((value) => value >= 0 && value <= 1)).toBe(true);
     expect(values.at(-1)).toBe(1);
     expect([...values].sort((a, b) => a - b)).toEqual(values);
+  });
+
+  it('uses the dimensions and flags reported by the encoder', async () => {
+    const { deps } = makeDeps({
+      encode: vi.fn(async () => ({
+        blob: new Blob(['x']),
+        width: 100,
+        height: 75,
+        downscaled: true,
+        targetMissed: true,
+      })),
+    });
+    const result = await processImage(
+      { imageId: 'x', file: file(), pipeline: pipeline(), attempt: 0 },
+      vi.fn(),
+      deps,
+    );
+    expect(result).toMatchObject({ width: 100, height: 75, downscaled: true, targetMissed: true });
   });
 });
