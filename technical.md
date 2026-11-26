@@ -124,8 +124,9 @@ re-image/
 │  │  └─ limits.ts        # memory / dimension guards
 │  ├─ codecs/             # thin wrappers over jSquash, lazy import()
 │  ├─ tools/
-│  │  ├─ registry.ts      # list of all tools
-│  │  ├─ compress/        # index.ts (plugin), Panel.tsx, compress.test.ts
+│  │  ├─ runtimeRegistry.ts  # worker-side tools (no React)
+│  │  ├─ uiRegistry.ts       # main-thread tool UIs
+│  │  ├─ compress/        # options.ts, runtime.ts, ui.ts, Panel.tsx, compress.test.tsx
 │  │  ├─ convert/
 │  │  ├─ resize/
 │  │  └─ crop/
@@ -201,15 +202,21 @@ interface ImageResult {
 Every tool implements one interface:
 
 ```ts
-export interface ImageTool<O> {
+// Worker side: imported by the image worker. No React, no DOM.
+export interface ToolRuntime<O> {
   id: string; // unique, kebab-case
-  labelKey: string; // i18n key
-  icon: string;
   defaults: O;
   validate(options: O): string[]; // [] = valid; else i18n error keys
   run(input: ImageBitmap, options: O, ctx: ToolContext): Promise<ImageBitmap>;
-  Panel: React.FC<{ value: O; onChange(o: O): void }>; // main thread only
   supports?(env: Env): boolean; // hide when the browser can't do it
+}
+
+// Main-thread side: imported by the app. Never imported by the worker.
+export interface ToolUI<O> {
+  id: string; // same id as the matching ToolRuntime
+  labelKey: string; // i18n key
+  icon: string;
+  Panel: React.ComponentType<{ value: O; onChange(o: O): void }>;
 }
 
 export interface ToolContext {
@@ -220,9 +227,9 @@ export interface ToolContext {
 ```
 
 - `run` runs **inside a worker**. It must be pure: no DOM, no network.
-- `Panel` is the options UI. It is bundled separately from `run`, so worker bundles stay small.
+- A tool is two objects with the same `id`: a `ToolRuntime` (registered in `runtimeRegistry.ts`, loaded by the worker) and a `ToolUI` (registered in `uiRegistry.ts`, loaded by the app). Options types, defaults and `validate` live in a shared React-free `options.ts`. ESLint forbids React and UI imports on the worker side, and `size-limit` caps the worker bundle. See [ADR 002](docs/adr/002-split-tool-runtime-and-ui.md).
 - Output encoding is **not** a tool step. It happens once at the end of the pipeline (see [Codecs](#8-codecs)).
-- Multi-input tools (merge/collage) implement `runMany(inputs: ImageBitmap[], …)` and are flagged `kind: 'many-to-one'`.
+- Multi-input tools (merge/collage) implement `runMany(inputs: ImageBitmap[], …)` on the `ToolRuntime` and are flagged `kind: 'many-to-one'`.
 
 ---
 
@@ -403,25 +410,25 @@ Tools and formats that the browser can't support are hidden or shown with an exp
 ## Adding a new tool
 
 1. Create `src/tools/<tool-id>/` with:
-   - `index.ts`: exports an `ImageTool<Options>`
+   - `options.ts`: the options type, defaults and `validate` (no React)
+   - `runtime.ts`: exports a `ToolRuntime<Options>` (worker side, no React)
+   - `ui.ts`: exports a `ToolUI<Options>` with a lazy `Panel`
    - `Panel.tsx`: the options UI
    - `<tool-id>.test.ts`: unit tests with fixtures
-2. Register it in `src/tools/registry.ts`.
+2. Register the runtime in `src/tools/runtimeRegistry.ts` and the UI in `src/tools/uiRegistry.ts`.
 3. Add i18n keys to `src/i18n/en.json` and `id.json`.
 4. (Optional) Add an SEO page in `src/pages/`.
 5. Add an E2E spec in `e2e/` if the tool has its own page.
 6. Open a PR. If the tool changes core behaviour, add an ADR.
 
 ```ts
-// src/tools/flip/index.ts
-import type { ImageTool } from '../types';
+// src/tools/flip/runtime.ts (worker side, no React)
+import type { ToolRuntime } from '../types';
 
 type FlipOptions = { axis: 'horizontal' | 'vertical' };
 
-export const flip: ImageTool<FlipOptions> = {
+export const flipRuntime: ToolRuntime<FlipOptions> = {
   id: 'flip',
-  labelKey: 'tools.flip.label',
-  icon: 'flip-horizontal',
   defaults: { axis: 'horizontal' },
   validate: () => [],
   async run(input, { axis }, ctx) {
@@ -438,7 +445,17 @@ export const flip: ImageTool<FlipOptions> = {
     input.close();
     return c.transferToImageBitmap();
   },
-  Panel: FlipPanel,
+};
+
+// src/tools/flip/ui.ts (main thread)
+import { lazy } from 'react';
+import type { ToolUI } from '../types';
+
+export const flipUI: ToolUI<FlipOptions> = {
+  id: 'flip',
+  labelKey: 'tools.flip.label',
+  icon: 'flip-horizontal',
+  Panel: lazy(() => import('./Panel.tsx')),
 };
 ```
 

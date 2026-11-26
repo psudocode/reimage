@@ -1,6 +1,6 @@
 import { Suspense, useState } from 'react';
 import { useT } from '../../i18n/index.ts';
-import { compress } from '../../tools/compress/index.ts';
+import { getToolUIById } from '../../tools/uiRegistry.ts';
 import { Dropzone } from './Dropzone.tsx';
 import { formatBytes, savedPercent } from './files.ts';
 import { ImageList } from './ImageList.tsx';
@@ -11,7 +11,8 @@ export function Workspace({ deps = browserWorkspaceDeps }: { deps?: WorkspaceDep
   const workspace = useWorkspace(deps);
   const { items, running, options, errors } = workspace;
   const [skipped, setSkipped] = useState(0);
-  const Panel = compress.Panel;
+  const tool = getToolUIById('compress')!;
+  const Panel = tool.Panel;
 
   const handleFiles = (files: File[]) => {
     setSkipped(workspace.addFiles(files).rejected);
@@ -56,7 +57,7 @@ export function Workspace({ deps = browserWorkspaceDeps }: { deps?: WorkspaceDep
         aria-label={t('workspace.optionsTitle')}
         className="h-fit space-y-5 rounded-xl border border-slate-800 bg-slate-900/60 p-4"
       >
-        <h2 className="text-lg font-semibold">{t(compress.labelKey)}</h2>
+        <h2 className="text-lg font-semibold">{t(tool.labelKey)}</h2>
         <Suspense fallback={<p className="text-sm text-slate-400">{t('workspace.loading')}</p>}>
           <Panel value={options} onChange={workspace.setOptions} />
         </Suspense>
