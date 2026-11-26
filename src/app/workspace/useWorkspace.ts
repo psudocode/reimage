@@ -10,7 +10,11 @@ import {
 import { JobRunner, type JobEvents, type JobHandle } from '../../core/job/JobRunner.ts';
 import type { InputImage, Job } from '../../core/pipeline/types.ts';
 import { createImagePool } from '../../core/workers/imagePool.ts';
-import { compress, compressDefaults, type CompressOptions } from '../../tools/compress/index.ts';
+import {
+  compressDefaults,
+  validateCompress,
+  type CompressOptions,
+} from '../../tools/compress/options.ts';
 import { extensionForMime, outputFileName, splitAcceptedFiles, uniqueFileName } from './files.ts';
 import { buildCompressPipeline } from './pipeline.ts';
 import {
@@ -65,7 +69,7 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
   const runnerRef = useRef<WorkspaceRunner | null>(null);
   const handleRef = useRef<JobHandle | null>(null);
 
-  const errors = useMemo(() => compress.validate(options), [options]);
+  const errors = useMemo(() => validateCompress(options), [options]);
 
   const addFiles = useCallback((files: Iterable<File>) => {
     const { accepted, rejected } = splitAcceptedFiles(files);
@@ -97,7 +101,7 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
 
   const run = useCallback(async () => {
     const { items, running } = stateRef.current;
-    if (running || items.length === 0 || compress.validate(options).length > 0) return;
+    if (running || items.length === 0 || validateCompress(options).length > 0) return;
     const d = depsRef.current;
 
     // Re-running replaces earlier results: free their blobs now.

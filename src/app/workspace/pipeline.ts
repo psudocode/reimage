@@ -1,5 +1,5 @@
 import type { Pipeline } from '../../core/pipeline/types.ts';
-import { toOutputSettings, type CompressOptions } from '../../tools/compress/index.ts';
+import { toOutputSettings, type CompressOptions } from '../../tools/compress/options.ts';
 
 export const FILE_NAME_PATTERN = '{name}-reimage.{ext}';
 

@@ -3,7 +3,7 @@ import { wasmEncoder, type Encoder } from '../image/encode.ts';
 import { fitWithinMaxPixels, resampleBitmap, scaleSize, type Size } from '../image/resample.ts';
 import { exceedsMaxPixels, getMaxPixels } from '../limits.ts';
 import type { ImageResult, Pipeline } from '../pipeline/types.ts';
-import type { ImageTool, ToolContext } from '../../tools/types.ts';
+import type { ToolContext, ToolRuntime } from '../../tools/types.ts';
 
 export interface ProcessRequest {
   imageId: string;
@@ -15,7 +15,7 @@ export interface ProcessRequest {
 
 export interface ProcessDeps {
   decode(file: File): Promise<ImageBitmap>;
-  getTool(id: string): ImageTool<unknown> | undefined;
+  getTool(id: string): ToolRuntime<unknown> | undefined;
   encode: Encoder;
   resample(input: ImageBitmap, width: number, height: number): Promise<ImageBitmap>;
   createCanvas(width: number, height: number): OffscreenCanvas;

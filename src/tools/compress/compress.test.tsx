@@ -2,9 +2,11 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { Suspense, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { LocaleContext } from '../../i18n/index.ts';
-import { getToolById } from '../registry.ts';
-import { compress } from './index.ts';
+import { getToolRuntimeById } from '../runtimeRegistry.ts';
+import { getToolUIById } from '../uiRegistry.ts';
 import Panel from './Panel.tsx';
+import { compressRuntime } from './runtime.ts';
+import { compressUI } from './ui.ts';
 import {
   compressDefaults,
   toOutputSettings,
@@ -50,14 +52,15 @@ describe('compress options', () => {
 });
 
 describe('compress tool plugin', () => {
-  it('is registered under its id', () => {
-    expect(getToolById('compress')).toBe(compress);
+  it('is registered under its id, on both sides', () => {
+    expect(getToolRuntimeById('compress')).toBe(compressRuntime);
+    expect(getToolUIById('compress')).toBe(compressUI);
   });
 
   it('passes the bitmap through untouched and reports progress', async () => {
     const input = { width: 4, height: 4, close: vi.fn() } as unknown as ImageBitmap;
     const progress = vi.fn();
-    const out = await compress.run(input, compressDefaults, {
+    const out = await compressRuntime.run(input, compressDefaults, {
       signal: new AbortController().signal,
       progress,
       createCanvas: vi.fn(),
@@ -126,7 +129,7 @@ describe('Compress panel', () => {
   });
 
   it('loads lazily through the tool plugin', async () => {
-    const Lazy = compress.Panel;
+    const Lazy = compressUI.Panel;
     render(
       <Suspense fallback={<span>loading</span>}>
         <Lazy value={compressDefaults} onChange={() => {}} />

@@ -22,4 +22,38 @@ export default tseslint.config(
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     },
   },
+  {
+    // Worker side of the code must never import React: it would be shipped to every
+    // worker (see ADR 002). UI lives in `ui.ts` / `Panel.tsx` / `src/app`.
+    files: [
+      'src/core/**/*.ts',
+      'src/codecs/**/*.ts',
+      'src/tools/runtimeRegistry.ts',
+      'src/tools/*/runtime.ts',
+      'src/tools/*/options.ts',
+    ],
+    ignores: ['**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                'react',
+                'react-dom',
+                'react-dom/*',
+                'react/*',
+                '**/*.tsx',
+                '**/ui.ts',
+                '**/uiRegistry.ts',
+              ],
+              message:
+                'Worker-side code must not import React or UI modules (see docs/adr/002-split-tool-runtime-and-ui.md).',
+            },
+          ],
+        },
+      ],
+    },
+  },
 );

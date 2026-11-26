@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Pipeline } from '../pipeline/types.ts';
-import type { ImageTool } from '../../tools/types.ts';
+import type { ToolRuntime } from '../../tools/types.ts';
 import {
   ImageTooLargeError,
   InvalidToolOptionsError,
@@ -25,15 +25,12 @@ const pipeline = (steps: Pipeline['steps'] = []): Pipeline => ({
   output: { format: 'webp', quality: 80, stripMetadata: true, fileNamePattern: '{name}.{ext}' },
 });
 
-function makeTool(overrides: Partial<ImageTool<unknown>> = {}): ImageTool<unknown> {
+function makeTool(overrides: Partial<ToolRuntime<unknown>> = {}): ToolRuntime<unknown> {
   return {
     id: 'noop',
-    labelKey: 'noop',
-    icon: 'x',
     defaults: {},
     validate: () => [],
     run: vi.fn(async (input: ImageBitmap) => input),
-    Panel: (() => null) as ImageTool<unknown>['Panel'],
     ...overrides,
   };
 }
