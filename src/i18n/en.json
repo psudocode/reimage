@@ -115,6 +115,25 @@
         "position": "Position must be between 0 and 100.",
         "edges": "Each edge must be 0 to 99, and opposite edges must leave part of the image."
       }
+    },
+    "rotate": {
+      "label": "Rotate & flip",
+      "description": "Turn the image in quarter steps and mirror it. Nothing is resampled, so quality is untouched.",
+      "rotation": "Rotate clockwise",
+      "rotationHint": "Applied after any flip.",
+      "turns": {
+        "0": "No rotation",
+        "90": "Rotate 90 degrees",
+        "180": "Rotate 180 degrees",
+        "270": "Rotate 270 degrees"
+      },
+      "flip": "Flip",
+      "flipH": "Flip horizontally",
+      "flipV": "Flip vertically",
+      "exifHint": "Photos that carry an EXIF orientation are straightened automatically when they load, so you start from an upright image.",
+      "errors": {
+        "rotation": "Choose 0, 90, 180 or 270 degrees."
+      }
     }
   },
   "categories": {
