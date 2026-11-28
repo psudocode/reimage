@@ -115,6 +115,23 @@
         "position": "Position must be between 0 and 100.",
         "edges": "Each edge must be 0 to 99, and opposite edges must leave part of the image."
       }
+    },
+    "removeBackground": {
+      "label": "Remove background",
+      "description": "Cut out the subject and make the background transparent. An AI model runs on your device; your images are never uploaded.",
+      "modelMissing": "The model is not on this device yet. It downloads once and is then kept for next time.",
+      "download": "Download model (~44 MB)",
+      "downloading": "Downloading model…",
+      "cancel": "Cancel",
+      "modelReady": "Model ready (works offline)",
+      "removeModel": "Delete model",
+      "privacy": "Only the model file is downloaded, from Hugging Face. Your images stay in your browser.",
+      "softEdges": "Soft edges",
+      "softEdgesHint": "Keeps fine detail like hair. Turn off for a hard cut-out.",
+      "outputHint": "The result is saved as PNG to keep transparency. Large images can take a while on phones.",
+      "errors": {
+        "download": "Could not download the model. Check your connection and try again."
+      }
     }
   },
   "categories": {

@@ -37,6 +37,13 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="M20 8v10a2 2 0 0 1-2 2H8" />
     </>
   ),
+  'remove-background': (
+    <>
+      <circle cx="12" cy="9" r="3.5" />
+      <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
+      <rect x="2.5" y="2.5" width="19" height="19" rx="2" strokeDasharray="3 3" />
+    </>
+  ),
   export: (
     <>
       <path d="M12 3v12" />
