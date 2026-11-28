@@ -6,6 +6,7 @@ export const ICON_NAMES = [
   'convert',
   'transform',
   'export',
+  'shield',
   'upload',
   'download',
   'search',
