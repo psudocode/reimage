@@ -7,8 +7,13 @@ import {
   useRef,
   useState,
 } from 'react';
-import { JobRunner, type JobEvents, type JobHandle } from '../../core/job/JobRunner.ts';
-import type { InputImage, Job } from '../../core/pipeline/types.ts';
+import {
+  JobRunner,
+  type JobEvents,
+  type JobHandle,
+  type PreviewRequest,
+} from '../../core/job/JobRunner.ts';
+import type { ImageResult, InputImage, Job } from '../../core/pipeline/types.ts';
 import { createImagePool } from '../../core/workers/imagePool.ts';
 import { getRegisteredRuntimes, getToolRuntimeById } from '../../tools/runtimeRegistry.ts';
 import { extensionForMime, outputFileName, splitAcceptedFiles, uniqueFileName } from './files.ts';
@@ -23,6 +28,8 @@ import {
 /** What the workspace needs from a job runner. Swapped for a fake in tests. */
 export interface WorkspaceRunner {
   start(job: Job, events: JobEvents): JobHandle;
+  /** One image through a pipeline on a downscaled copy (live preview). */
+  preview(request: PreviewRequest): Promise<ImageResult>;
   dispose(): void;
 }
 
@@ -38,7 +45,11 @@ export const browserWorkspaceDeps: WorkspaceDeps = {
   createRunner() {
     const pool = createImagePool();
     const runner = new JobRunner(pool);
-    return { start: (job, events) => runner.start(job, events), dispose: () => pool.destroy() };
+    return {
+      start: (job, events) => runner.start(job, events),
+      preview: (request) => runner.preview(request),
+      dispose: () => pool.destroy(),
+    };
   },
   createId: () => crypto.randomUUID(),
   createObjectURL: (blob) => URL.createObjectURL(blob),
@@ -52,16 +63,13 @@ function revokeItem(item: WorkspaceItem, deps: WorkspaceDeps) {
 
 export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
   const [state, dispatch] = useReducer(workspaceReducer, initialWorkspaceState);
-  const [toolId, setToolId] = useState(() => getRegisteredRuntimes()[0]!.id);
+  const [toolId, setToolIdState] = useState(() => getRegisteredRuntimes()[0]!.id);
   // Each tool keeps its own options, so switching tabs never loses what was typed.
   const [optionsByTool, setOptionsByTool] = useState<Record<string, unknown>>(() =>
     Object.fromEntries(getRegisteredRuntimes().map((tool) => [tool.id, tool.defaults])),
   );
   const options = optionsByTool[toolId];
-  const setOptions = useCallback(
-    (next: unknown) => setOptionsByTool((previous) => ({ ...previous, [toolId]: next })),
-    [toolId],
-  );
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   // Event callbacks and the unmount cleanup need the latest state without re-subscribing.
   // Layout effect, not a passive one: a click right after a commit must see that commit.
@@ -73,6 +81,46 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
   const depsRef = useRef(deps);
   const runnerRef = useRef<WorkspaceRunner | null>(null);
   const handleRef = useRef<JobHandle | null>(null);
+
+  /** Results were made with the old settings: free them so nothing stale can be downloaded. */
+  const invalidateResults = useCallback(() => {
+    const { items, running } = stateRef.current;
+    if (running || !items.some((item) => item.status === 'done' || item.status === 'failed')) {
+      return;
+    }
+    for (const item of items) if (item.result) depsRef.current.revokeObjectURL(item.result.url);
+    dispatch({ type: 'invalidate' });
+  }, []);
+
+  const setToolId = useCallback(
+    (id: string) => {
+      invalidateResults();
+      setToolIdState(id);
+    },
+    [invalidateResults],
+  );
+  const setOptions = useCallback(
+    (next: unknown) => {
+      invalidateResults();
+      setOptionsByTool((previous) => ({ ...previous, [toolId]: next }));
+    },
+    [toolId, invalidateResults],
+  );
+
+  const ensureRunner = useCallback(() => {
+    runnerRef.current ??= depsRef.current.createRunner();
+    return runnerRef.current;
+  }, []);
+
+  /** What the live preview needs; stable so its effects don't re-run on every render. */
+  const previewApi = useMemo(
+    () => ({
+      render: (request: PreviewRequest) => ensureRunner().preview(request),
+      createObjectURL: (blob: Blob) => depsRef.current.createObjectURL(blob),
+      revokeObjectURL: (url: string) => depsRef.current.revokeObjectURL(url),
+    }),
+    [ensureRunner],
+  );
 
   const errors = useMemo(
     () => getToolRuntimeById(toolId)?.validate(options) ?? [],
@@ -127,8 +175,7 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
     const names = new Map(items.map((item) => [item.id, item.name]));
 
     dispatch({ type: 'begin' });
-    runnerRef.current ??= d.createRunner();
-    const handle = runnerRef.current.start(job, {
+    const handle = ensureRunner().start(job, {
       onProgress: (id, fraction) => {
         if (handleRef.current === handle) dispatch({ type: 'progress', id, fraction });
       },
@@ -168,7 +215,7 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
       handleRef.current = null;
       dispatch({ type: 'end' });
     }
-  }, [toolId, options, errors]);
+  }, [toolId, options, errors, ensureRunner]);
 
   const cancel = useCallback(() => handleRef.current?.cancel(), []);
 
@@ -184,8 +231,13 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
     [],
   );
 
+  const selected = state.items.find((item) => item.id === selectedId) ?? state.items[0];
+
   return {
     ...state,
+    selected,
+    select: setSelectedId,
+    previewApi,
     toolId,
     setToolId,
     options,

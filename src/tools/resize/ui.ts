@@ -6,6 +6,7 @@ import type { ResizeOptions } from './options.ts';
 export const resizeUI: ToolUI<ResizeOptions> = {
   id: 'resize',
   labelKey: 'tools.resize.label',
-  icon: 'maximize',
+  category: 'transform',
+  icon: 'resize',
   Panel: lazy(() => import('./Panel.tsx')),
 };

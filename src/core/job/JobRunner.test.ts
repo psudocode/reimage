@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ImageResult, InputImage, Job, Pipeline } from '../pipeline/types.ts';
 import { WorkerPool, type PoolWorker } from '../workers/pool.ts';
-import { JobRunner, type ImageWorkerPoolLike } from './JobRunner.ts';
+import { JobRunner, PREVIEW_MAX_EDGE, type ImageWorkerPoolLike } from './JobRunner.ts';
 
 type ProcessFn = (
-  request: { imageId: string; attempt: number },
+  request: { imageId: string; attempt: number; previewMaxEdge?: number },
   onProgress: (fraction: number) => void,
 ) => Promise<ImageResult>;
 
@@ -156,5 +156,23 @@ describe('JobRunner', () => {
     });
     await new JobRunner(pool).start(job([image('a')])).promise;
     expect(seen).toEqual([0]);
+  });
+
+  it('previews one image on a downscaled copy', async () => {
+    const seen: Array<{ imageId: string; previewMaxEdge?: number }> = [];
+    const pool = makePool(async (request) => {
+      seen.push(request);
+      return { ...result(request.imageId), previewScale: 0.25 };
+    });
+    const runner = new JobRunner(pool);
+
+    const first = await runner.preview({ imageId: 'a', file: image('a').file, pipeline });
+    expect(first.previewScale).toBe(0.25);
+    await runner.preview({ imageId: 'b', file: image('b').file, pipeline, maxEdge: 300 });
+
+    expect(seen).toEqual([
+      expect.objectContaining({ imageId: 'a', previewMaxEdge: PREVIEW_MAX_EDGE }),
+      expect.objectContaining({ imageId: 'b', previewMaxEdge: 300 }),
+    ]);
   });
 });

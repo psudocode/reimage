@@ -1,6 +1,12 @@
 import { decodeFile } from '../image/decode.ts';
 import { wasmEncoder, type Encoder } from '../image/encode.ts';
-import { fitWithinMaxPixels, resampleBitmap, scaleSize, type Size } from '../image/resample.ts';
+import {
+  fitWithinMaxEdge,
+  fitWithinMaxPixels,
+  resampleBitmap,
+  scaleSize,
+  type Size,
+} from '../image/resample.ts';
 import { exceedsMaxPixels, getMaxPixels } from '../limits.ts';
 import type { ImageResult, Pipeline } from '../pipeline/types.ts';
 import type { ToolContext, ToolRuntime } from '../../tools/types.ts';
@@ -11,6 +17,11 @@ export interface ProcessRequest {
   pipeline: Pipeline;
   /** 0 on the first try; >0 after a worker crash. Triggers a downscale. */
   attempt: number;
+  /**
+   * Live preview: shrink the decoded image so its longest side is at most this
+   * many pixels before the pipeline runs. The result reports `previewScale`.
+   */
+  previewMaxEdge?: number;
 }
 
 export interface ProcessDeps {
@@ -59,7 +70,7 @@ export async function processImage(
   onProgress: (fraction: number) => void,
   deps: ProcessDeps,
 ): Promise<ImageResult> {
-  const { imageId, file, pipeline, attempt } = request;
+  const { imageId, file, pipeline, attempt, previewMaxEdge } = request;
   const started = deps.now();
   const stepCount = pipeline.steps.length;
 
@@ -105,6 +116,18 @@ export async function processImage(
       downscaled = true;
     }
 
+    let previewScale: number | undefined;
+    if (previewMaxEdge !== undefined) {
+      const fitted = fitWithinMaxEdge(
+        { width: current.width, height: current.height },
+        previewMaxEdge,
+      );
+      if (fitted.width !== current.width || fitted.height !== current.height) {
+        await replace(deps.resample(current, fitted.width, fitted.height));
+      }
+      previewScale = current.width / source.width;
+    }
+
     const controller = new AbortController();
     for (let index = 0; index < stepCount; index += 1) {
       const tool = tools[index]!;
@@ -122,7 +145,15 @@ export async function processImage(
       onProgress((index + 1) / (stepCount + 1));
     }
 
-    const encoded = await deps.encode(current, pipeline.output, file.type);
+    // A byte budget is for the full-size file; on a shrunken preview it scales with the pixels.
+    const output =
+      previewScale !== undefined && previewScale < 1 && pipeline.output.targetBytes !== undefined
+        ? {
+            ...pipeline.output,
+            targetBytes: Math.max(1, Math.round(pipeline.output.targetBytes * previewScale ** 2)),
+          }
+        : pipeline.output;
+    const encoded = await deps.encode(current, output, file.type);
     onProgress(1);
 
     return {
@@ -135,6 +166,7 @@ export async function processImage(
       ms: deps.now() - started,
       ...(downscaled || encoded.downscaled ? { downscaled: true } : {}),
       ...(encoded.targetMissed ? { targetMissed: true } : {}),
+      ...(previewScale !== undefined ? { previewScale } : {}),
     };
   } finally {
     current.close();

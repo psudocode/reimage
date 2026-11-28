@@ -85,4 +85,18 @@ describe('workspaceReducer', () => {
     expect(state.items[0]!.status).toBe('done');
     expect(state.items[1]).toMatchObject({ status: 'ready', progress: 0 });
   });
+
+  it('invalidate returns finished and failed items to ready and drops their results', () => {
+    const state = workspaceReducer(
+      withItems(
+        item('a', { status: 'done', progress: 1, result }),
+        item('b', { status: 'failed', error: 'boom' }),
+        item('c'),
+      ),
+      { type: 'invalidate' },
+    );
+    expect(state.items.map((i) => i.status)).toEqual(['ready', 'ready', 'ready']);
+    expect(state.items[0]).toMatchObject({ progress: 0, result: undefined });
+    expect(state.items[1]!.error).toBeUndefined();
+  });
 });

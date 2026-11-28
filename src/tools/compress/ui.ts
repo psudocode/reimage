@@ -6,6 +6,7 @@ import type { CompressOptions } from './options.ts';
 export const compressUI: ToolUI<CompressOptions> = {
   id: 'compress',
   labelKey: 'tools.compress.label',
-  icon: 'file-down',
+  category: 'export',
+  icon: 'compress',
   Panel: lazy(() => import('./Panel.tsx')),
 };

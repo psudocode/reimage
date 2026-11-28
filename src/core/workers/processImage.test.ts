@@ -193,6 +193,82 @@ describe('processImage', () => {
     expect(huge.close).toHaveBeenCalledTimes(1);
   });
 
+  it('shrinks to the preview edge before the pipeline and reports the scale', async () => {
+    const run = vi.fn(async (input: ImageBitmap) => input);
+    const { deps } = makeDeps({ getTool: () => makeTool({ run }) });
+    const result = await processImage(
+      {
+        imageId: 'x',
+        file: file(),
+        pipeline: pipeline([{ toolId: 'noop', options: {} }]),
+        attempt: 0,
+        previewMaxEdge: 200,
+      },
+      vi.fn(),
+      deps,
+    );
+    // 400x300 -> 200x150, and the tool saw the small bitmap.
+    expect(deps.resample).toHaveBeenCalledWith(expect.anything(), 200, 150);
+    expect(run.mock.calls[0]![0]).toMatchObject({ width: 200, height: 150 });
+    expect(result.previewScale).toBe(0.5);
+    expect(result.downscaled).toBeUndefined();
+  });
+
+  it('scales a target size down with the preview so the estimate stays honest', async () => {
+    const { deps } = makeDeps();
+    const request = {
+      imageId: 'x',
+      file: file(),
+      pipeline: { ...pipeline(), output: { ...pipeline().output, targetBytes: 100_000 } },
+      attempt: 0,
+    };
+    await processImage({ ...request, previewMaxEdge: 200 }, vi.fn(), deps);
+    expect(deps.encode).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ targetBytes: 25_000 }),
+      'image/jpeg',
+    );
+    await processImage(request, vi.fn(), deps);
+    expect(deps.encode).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ targetBytes: 100_000 }),
+      'image/jpeg',
+    );
+  });
+
+  it('leaves a small image alone in preview mode (scale 1)', async () => {
+    const { deps } = makeDeps();
+    const result = await processImage(
+      { imageId: 'x', file: file(), pipeline: pipeline(), attempt: 0, previewMaxEdge: 1000 },
+      vi.fn(),
+      deps,
+    );
+    expect(deps.resample).not.toHaveBeenCalled();
+    expect(result.previewScale).toBe(1);
+  });
+
+  it('still applies the pixel guard to the original image in preview mode', async () => {
+    const huge = bitmap(10_000, 10_000);
+    const { deps } = makeDeps({ decode: async () => huge });
+    await expect(
+      processImage(
+        { imageId: 'x', file: file(), pipeline: pipeline(), attempt: 0, previewMaxEdge: 800 },
+        vi.fn(),
+        deps,
+      ),
+    ).rejects.toBeInstanceOf(ImageTooLargeError);
+  });
+
+  it('omits previewScale for a normal run', async () => {
+    const { deps } = makeDeps();
+    const result = await processImage(
+      { imageId: 'x', file: file(), pipeline: pipeline(), attempt: 0 },
+      vi.fn(),
+      deps,
+    );
+    expect(result).not.toHaveProperty('previewScale');
+  });
+
   it('downscales and flags the result on a retry attempt', async () => {
     const { deps } = makeDeps();
     const result = await processImage(

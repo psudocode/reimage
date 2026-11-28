@@ -116,5 +116,50 @@
         "edges": "Each edge must be 0 to 99, and opposite edges must leave part of the image."
       }
     }
+  },
+  "categories": {
+    "transform": "Transform",
+    "export": "Export"
+  },
+  "editor": {
+    "railLabel": "Tool categories",
+    "toolsLabel": "Tools",
+    "searchLabel": "Search tools",
+    "searchPlaceholder": "Search tools…",
+    "noMatch": "No tool matches “{query}”.",
+    "upload": "Upload",
+    "apply": "Apply",
+    "download": "Download",
+    "before": "Before",
+    "after": "After",
+    "compareLabel": "Before and after",
+    "compareHint": "Use the arrow keys to move the divider.",
+    "previewLoading": "Updating preview…",
+    "previewError": "Preview failed: {message}",
+    "previewNote": "Preview is a smaller copy. File size is an estimate.",
+    "estimated": "≈",
+    "position": "{current} / {total}",
+    "previous": "Previous image",
+    "next": "Next image",
+    "allImages": "All images",
+    "close": "Close",
+    "filmstrip": "Images",
+    "options": "Tool options",
+    "canvas": "Editing canvas",
+    "cropBox": "Crop area",
+    "cropBoxHint": "Drag, or use the arrow keys to move it. Shift moves in bigger steps.",
+    "cropHandle": "Resize crop",
+    "cropFixedHint": "Fixed ratio: drag to slide the box. Switch to Free to resize it.",
+    "handles": {
+      "nw": "top left",
+      "n": "top",
+      "ne": "top right",
+      "e": "right",
+      "se": "bottom right",
+      "s": "bottom",
+      "sw": "bottom left",
+      "w": "left"
+    },
+    "saving": "Working…"
   }
 }

@@ -40,6 +40,7 @@ export type WorkspaceAction =
   | { type: 'progress'; id: string; fraction: number }
   | { type: 'result'; id: string; result: ItemResult }
   | { type: 'failure'; id: string; message: string }
+  | { type: 'invalidate' }
   | { type: 'end' };
 
 function update(
@@ -87,6 +88,16 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
         status: 'failed',
         error: action.message,
       }));
+    case 'invalidate':
+      // Options changed: finished or failed items no longer match what is on screen.
+      return {
+        ...state,
+        items: state.items.map((item) =>
+          item.status === 'done' || item.status === 'failed'
+            ? { ...item, status: 'ready', progress: 0, result: undefined, error: undefined }
+            : item,
+        ),
+      };
     case 'end':
       // Anything still processing was cancelled: put it back so it can be re-run.
       return {

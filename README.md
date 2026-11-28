@@ -53,6 +53,8 @@ Your files ──► Browser UI ──► Job runner ──► Worker pool ─�
                               Tool plugins + WebAssembly codecs
 ```
 
+The interface is an image editor: pick a tool from the category rail, adjust its options and watch a **live preview** (with a before/after slider, estimated file size, and an interactive crop box) before you apply it to the whole batch. On phones it switches to a full-screen layout with a bottom tab bar.
+
 Everything runs client-side. Heavy work happens in Web Workers, so the page stays responsive. Encoding uses WebAssembly codecs (MozJPEG, OxiPNG, WebP, AVIF), the same kind Squoosh uses. See [technical.md](./technical.md) for the full design.
 
 ## Privacy

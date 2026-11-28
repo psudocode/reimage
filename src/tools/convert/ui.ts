@@ -6,6 +6,7 @@ import type { ConvertOptions } from './options.ts';
 export const convertUI: ToolUI<ConvertOptions> = {
   id: 'convert',
   labelKey: 'tools.convert.label',
-  icon: 'repeat',
+  category: 'export',
+  icon: 'convert',
   Panel: lazy(() => import('./Panel.tsx')),
 };

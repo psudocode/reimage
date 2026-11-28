@@ -6,6 +6,8 @@ import type { CropOptions } from './options.ts';
 export const cropUI: ToolUI<CropOptions> = {
   id: 'crop',
   labelKey: 'tools.crop.label',
+  category: 'transform',
   icon: 'crop',
   Panel: lazy(() => import('./Panel.tsx')),
+  Overlay: lazy(() => import('./Overlay.tsx')),
 };

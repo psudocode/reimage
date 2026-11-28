@@ -1,5 +1,8 @@
 import type { ComponentType } from 'react';
 import type { Env, OutputSettings } from '../core/pipeline/types.ts';
+import type { Size } from '../core/image/resample.ts';
+import type { IconName } from '../ui/iconNames.ts';
+import type { ToolCategoryId } from './categories.ts';
 
 export interface ToolContext {
   signal: AbortSignal;
@@ -15,6 +18,13 @@ export type OutputOverrides = Partial<Pick<OutputSettings, 'format' | 'quality' 
 export interface ToolPanelProps<O> {
   value: O;
   onChange(options: O): void;
+}
+
+/** The size of the image being shown, so an overlay can map percent to pixels. */
+export interface ToolOverlayProps<O> extends ToolPanelProps<O> {
+  imageSize: Size;
+  /** True while a job runs: the overlay must not change the options. */
+  disabled?: boolean;
 }
 
 /**
@@ -45,6 +55,14 @@ export interface ToolUI<O = unknown> {
   /** Must equal the `id` of the matching `ToolRuntime`. */
   id: string;
   labelKey: string;
-  icon: string;
+  /** Which rail category lists this tool. */
+  category: ToolCategoryId;
+  icon: IconName;
   Panel: ComponentType<ToolPanelProps<O>>;
+  /**
+   * Optional interactive layer drawn over the original image on the canvas
+   * (e.g. the crop box). While it exists, the canvas shows it instead of the
+   * before/after slider.
+   */
+  Overlay?: ComponentType<ToolOverlayProps<O>>;
 }

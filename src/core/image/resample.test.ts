@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fitWithinMaxPixels, resampleBitmap, scaleSize, type ResampleEngine } from './resample.ts';
+import {
+  fitWithinMaxEdge,
+  fitWithinMaxPixels,
+  resampleBitmap,
+  scaleSize,
+  type ResampleEngine,
+} from './resample.ts';
 
 function fakeCanvas(width: number, height: number) {
   const output = { width, height, close: vi.fn() } as unknown as ImageBitmap;
@@ -12,6 +18,31 @@ function fakeCanvas(width: number, height: number) {
 }
 
 const input = { width: 4000, height: 3000, close: vi.fn() } as unknown as ImageBitmap;
+
+describe('fitWithinMaxEdge', () => {
+  it('shrinks the longest side and keeps the ratio', () => {
+    expect(fitWithinMaxEdge({ width: 4000, height: 3000 }, 1000)).toEqual({
+      width: 1000,
+      height: 750,
+    });
+    expect(fitWithinMaxEdge({ width: 3000, height: 6000 }, 1000)).toEqual({
+      width: 500,
+      height: 1000,
+    });
+  });
+
+  it('never enlarges', () => {
+    expect(fitWithinMaxEdge({ width: 300, height: 200 }, 1000)).toEqual({
+      width: 300,
+      height: 200,
+    });
+  });
+
+  it('rejects invalid input', () => {
+    expect(() => fitWithinMaxEdge({ width: 0, height: 10 }, 100)).toThrow(RangeError);
+    expect(() => fitWithinMaxEdge({ width: 10, height: 10 }, 0)).toThrow(RangeError);
+  });
+});
 
 describe('fitWithinMaxPixels', () => {
   it('returns the same size when it already fits', () => {

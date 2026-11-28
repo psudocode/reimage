@@ -8,7 +8,6 @@ describe('App', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'reimage' })).toBeInTheDocument();
     expect(screen.getByText(/right in your browser/i)).toBeInTheDocument();
     expect(screen.getByText(/Drop images here/)).toBeInTheDocument();
-    expect(await screen.findByRole('button', { name: 'Compress' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'ID' }));
     expect(screen.getByText(/langsung di browser/i)).toBeInTheDocument();

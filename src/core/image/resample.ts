@@ -83,6 +83,20 @@ export function fitWithinMaxPixels(size: Size, maxPixels: number): Size {
   return { width: w, height: h };
 }
 
+/**
+ * Returns `size` shrunk so its longest side is at most `maxEdge`, keeping the
+ * aspect ratio. Never enlarges: a size that already fits is returned unchanged.
+ */
+export function fitWithinMaxEdge(size: Size, maxEdge: number): Size {
+  const { width, height } = size;
+  if (width <= 0 || height <= 0 || !(maxEdge >= 1)) {
+    throw new RangeError('Width, height and maxEdge must be positive');
+  }
+  const longest = Math.max(width, height);
+  if (longest <= maxEdge) return { width, height };
+  return scaleSize(size, maxEdge / longest);
+}
+
 /** Scales `size` by `factor` (e.g. 0.5), never going below 1px per side. */
 export function scaleSize(size: Size, factor: number): Size {
   if (!(factor > 0)) throw new RangeError('Scale factor must be positive');
