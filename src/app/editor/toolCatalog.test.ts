@@ -9,7 +9,7 @@ describe('groupToolsByCategory', () => {
   it('groups the registered tools by their declared category', () => {
     const groups = groupToolsByCategory(getRegisteredUIs());
     expect(groups.map((g) => [g.id, g.tools.map((tool) => tool.id)])).toEqual([
-      ['transform', ['resize', 'crop']],
+      ['transform', ['resize', 'crop', 'watermark']],
       ['export', ['compress', 'convert']],
     ]);
   });
@@ -27,7 +27,7 @@ describe('filterTools', () => {
   });
 
   it('returns every tool for a blank query and none for no match', () => {
-    expect(filterTools(getRegisteredUIs(), '', t)).toHaveLength(4);
+    expect(filterTools(getRegisteredUIs(), '', t)).toHaveLength(5);
     expect(filterTools(getRegisteredUIs(), 'zzz', t)).toEqual([]);
   });
 

@@ -3,6 +3,7 @@ import { compressRuntime } from './compress/runtime.ts';
 import { convertRuntime } from './convert/runtime.ts';
 import { cropRuntime } from './crop/runtime.ts';
 import { resizeRuntime } from './resize/runtime.ts';
+import { watermarkRuntime } from './watermark/runtime.ts';
 import type { ToolRuntime } from './types.ts';
 
 // Worker side. Register a new tool's runtime here AND its UI in `uiRegistry.ts`
@@ -14,6 +15,7 @@ const registeredRuntimes: ToolRuntime<any>[] = [
   convertRuntime,
   resizeRuntime,
   cropRuntime,
+  watermarkRuntime,
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
