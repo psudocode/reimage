@@ -15,6 +15,13 @@ export interface ToolContext {
 /** Output settings a tool may set. The pipeline builder merges them over the defaults. */
 export type OutputOverrides = Partial<Pick<OutputSettings, 'format' | 'quality' | 'targetBytes'>>;
 
+/** One encoded image handed to `ToolRuntime.combine`. */
+export interface CombinePage {
+  blob: Blob;
+  width: number;
+  height: number;
+}
+
 export interface ToolPanelProps<O> {
   value: O;
   onChange(options: O): void;
@@ -35,12 +42,20 @@ export interface ToolOverlayProps<O> extends ToolPanelProps<O> {
 export interface ToolRuntime<O = unknown> {
   /** Unique, kebab-case. Shared with the matching `ToolUI`. */
   id: string;
+  /** `many-to-one` tools set `combine`: the whole batch becomes one download. */
   kind?: 'one-to-one' | 'many-to-one';
   defaults: O;
   /** `[]` = valid; otherwise i18n error keys. */
   validate(options: O): string[];
   run(input: ImageBitmap, options: O, ctx: ToolContext): Promise<ImageBitmap>;
   runMany?(inputs: ImageBitmap[], options: O, ctx: ToolContext): Promise<ImageBitmap>;
+  /**
+   * Batch tools whose output is ONE file (e.g. Images to PDF). Every image still
+   * runs through the worker pool on its own (decode, memory guard, `run`,
+   * encode); `combine` then joins the encoded pages, in the order the user
+   * sees them, into the single file to download.
+   */
+  combine?(pages: CombinePage[], options: O): Promise<Blob>;
   /**
    * Encoding happens once at the end of a pipeline (technical.md §6), so tools
    * like Compress and Convert change the *output settings* instead of the pixels.

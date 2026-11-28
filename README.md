@@ -37,6 +37,7 @@ reimage is a free, open-source image toolkit. It lets you compress, convert, res
 - Merge and collage (side by side, stacked, grid)
 - Watermark (text or logo)
 - Strip metadata (EXIF and GPS location)
+- Images to PDF (one page per image, fit/A4/Letter, margins; built in the browser)
 - **Pipelines:** Chain steps (crop → resize → compress → convert) and save them as presets
 
 ### Later

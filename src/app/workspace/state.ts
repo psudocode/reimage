@@ -28,6 +28,8 @@ export interface WorkspaceItem {
 export interface WorkspaceState {
   items: WorkspaceItem[];
   running: boolean;
+  /** The one file a batch tool (Images to PDF) makes out of every image. */
+  combined?: ItemResult;
 }
 
 export const initialWorkspaceState: WorkspaceState = { items: [], running: false };
@@ -39,6 +41,9 @@ export type WorkspaceAction =
   | { type: 'begin' }
   | { type: 'progress'; id: string; fraction: number }
   | { type: 'result'; id: string; result: ItemResult }
+  /** An image finished as one page of a combined file: done, but nothing to download. */
+  | { type: 'part'; id: string }
+  | { type: 'combined'; result: ItemResult }
   | { type: 'failure'; id: string; message: string }
   | { type: 'invalidate' }
   | { type: 'end' };
@@ -56,12 +61,18 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
     case 'add':
       return { ...state, items: [...state.items, ...action.items] };
     case 'remove':
-      return { ...state, items: state.items.filter((item) => item.id !== action.id) };
+      // The combined file was made from the old set of images.
+      return {
+        ...state,
+        combined: undefined,
+        items: state.items.filter((item) => item.id !== action.id),
+      };
     case 'clear':
-      return { ...state, items: [] };
+      return { ...state, combined: undefined, items: [] };
     case 'begin':
       return {
         running: true,
+        combined: undefined,
         items: state.items.map((item) => ({
           ...item,
           status: 'processing',
@@ -82,6 +93,16 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
         result: action.result,
         error: undefined,
       }));
+    case 'part':
+      return update(state, action.id, (item) => ({
+        ...item,
+        status: 'done',
+        progress: 1,
+        result: undefined,
+        error: undefined,
+      }));
+    case 'combined':
+      return { ...state, combined: action.result };
     case 'failure':
       return update(state, action.id, (item) => ({
         ...item,
@@ -92,6 +113,7 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
       // Options changed: finished or failed items no longer match what is on screen.
       return {
         ...state,
+        combined: undefined,
         items: state.items.map((item) =>
           item.status === 'done' || item.status === 'failed'
             ? { ...item, status: 'ready', progress: 0, result: undefined, error: undefined }
@@ -101,6 +123,7 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
     case 'end':
       // Anything still processing was cancelled: put it back so it can be re-run.
       return {
+        ...state,
         running: false,
         items: state.items.map((item) =>
           item.status === 'processing' ? { ...item, status: 'ready', progress: 0 } : item,

@@ -33,5 +33,5 @@
 
 - [ ] Browser-based background removal (ML)
 - [ ] Before/after comparison slider
-- [ ] Images to PDF
+- [x] Images to PDF
 - [ ] Additional languages

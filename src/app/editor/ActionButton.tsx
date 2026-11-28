@@ -18,7 +18,7 @@ export function ActionButton({
   compact?: boolean;
 }) {
   const t = useT();
-  const { running, selected, items, errors } = workspace;
+  const { running, selected, items, errors, combined } = workspace;
   const label = compact ? 'sr-only' : '';
 
   if (running) {
@@ -30,6 +30,15 @@ export function ActionButton({
       >
         {t('workspace.cancel')}
       </button>
+    );
+  }
+  if (combined) {
+    return (
+      <a href={combined.url} download={combined.fileName} className={PRIMARY}>
+        <Icon name="download" className="size-4" />
+        <span className={label}>{t('editor.download')}</span>
+        <span className="sr-only"> {combined.fileName}</span>
+      </a>
     );
   }
   if (selected?.status === 'done' && selected.result) {

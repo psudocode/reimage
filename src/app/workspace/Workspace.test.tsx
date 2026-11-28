@@ -394,6 +394,51 @@ describe('Workspace', () => {
     );
   });
 
+  it('turns the whole batch into one PDF, with pages in list order', async () => {
+    const { harness, add } = setup();
+    add(image('a.jpg'), image('b.jpg'));
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    fireEvent.click(tool('Images to PDF'));
+    fireEvent.change(await screen.findByLabelText('Page size'), { target: { value: 'a4' } });
+    fireEvent.click(apply());
+
+    const job = harness.jobs[0]!;
+    expect(job.pipeline.steps[0]).toMatchObject({
+      toolId: 'images-to-pdf',
+      options: { pageSize: 'a4' },
+    });
+    expect(job.pipeline.output).toMatchObject({ format: 'jpeg', quality: 85 });
+
+    const [first, second] = job.images;
+    act(() => {
+      // Results may arrive in any order; pages must follow the list.
+      harness.events[0]!.onResult?.(imageResult(second!.id, 300, { width: 20, height: 10 }));
+      harness.events[0]!.onResult?.(imageResult(first!.id, 200, { width: 10, height: 10 }));
+      harness.finish('done');
+    });
+
+    const link = await screen.findByRole('link', { name: /Download/ });
+    expect(link).toHaveAttribute('download', 'images.pdf');
+    // Per-page JPEGs are not offered as downloads.
+    expect(screen.getAllByRole('link', { name: /Download/ })).toHaveLength(1);
+  });
+
+  it('frees the PDF when the options change', async () => {
+    const { harness, add } = setup();
+    add(image('a.jpg'));
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    fireEvent.click(tool('Images to PDF'));
+    fireEvent.click(apply());
+    act(() => {
+      harness.events[0]!.onResult?.(imageResult(harness.jobs[0]!.images[0]!.id, 200));
+      harness.finish('done');
+    });
+    await screen.findByRole('link', { name: /Download/ });
+    fireEvent.change(screen.getByLabelText('Page size'), { target: { value: 'letter' } });
+    expect(await screen.findByRole('button', { name: 'Apply' })).toBeInTheDocument();
+    expect(harness.revoked.length).toBeGreaterThan(0);
+  });
+
   it('hides the quality slider and sends no quality for PNG', async () => {
     const { harness, add } = setup();
     add(image('a.jpg'));

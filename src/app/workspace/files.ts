@@ -57,6 +57,7 @@ const EXTENSIONS: Record<string, string> = {
   'image/png': 'png',
   'image/webp': 'webp',
   'image/avif': 'avif',
+  'application/pdf': 'pdf',
 };
 
 export function extensionForMime(mime: string): string {
