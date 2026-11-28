@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LocaleContext, messages, type Locale } from '../i18n/index.ts';
+import { UpdatePrompt } from './UpdatePrompt.tsx';
 import { Workspace } from './workspace/Workspace.tsx';
 
 export function App() {
@@ -48,6 +49,7 @@ export function App() {
           <p className="text-slate-300">{t.tagline}</p>
           <Workspace />
         </main>
+        <UpdatePrompt />
       </div>
     </LocaleContext.Provider>
   );

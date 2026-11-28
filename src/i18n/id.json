@@ -163,5 +163,12 @@
       "w": "kiri"
     },
     "saving": "Memproses…"
+  },
+  "pwa": {
+    "updateAvailable": "Versi baru tersedia.",
+    "reload": "Muat ulang",
+    "later": "Nanti",
+    "offlineReady": "Siap dipakai offline.",
+    "dismiss": "Tutup"
   }
 }
