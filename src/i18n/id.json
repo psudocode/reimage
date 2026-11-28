@@ -90,6 +90,29 @@
         "percent": "Persen harus antara 1 dan 1000.",
         "preset": "Pilih preset."
       }
+    },
+    "crop": {
+      "label": "Crop",
+      "description": "Potong gambar ke rasio tetap atau kotak bebas. Nilainya persen, jadi satu pengaturan cocok untuk banyak gambar sekaligus.",
+      "modeRatio": "Rasio tetap",
+      "modeFree": "Kotak bebas",
+      "ratio": "Rasio aspek",
+      "custom": "Kustom",
+      "ratioWidth": "Lebar rasio",
+      "ratioHeight": "Tinggi rasio",
+      "offsetX": "Posisi horizontal (%)",
+      "offsetY": "Posisi vertikal (%)",
+      "offsetHint": "Area terbesar dengan rasio ini yang dipertahankan. 50 = tengah, 0 = tepi kiri atau atas, 100 = tepi kanan atau bawah.",
+      "left": "Kiri (%)",
+      "top": "Atas (%)",
+      "width": "Lebar (%)",
+      "height": "Tinggi (%)",
+      "freeHint": "Kiri + lebar dan atas + tinggi tidak boleh lebih dari 100%.",
+      "errors": {
+        "box": "Masukkan kotak di dalam gambar: kiri dan atas 0-99, lebar dan tinggi 1-100, totalnya tidak lebih dari 100%.",
+        "ratio": "Pilih rasio. Nilai kustom harus antara 1 dan 100.",
+        "offset": "Posisi harus antara 0 dan 100."
+      }
     }
   }
 }

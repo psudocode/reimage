@@ -262,6 +262,7 @@ describe('Workspace', () => {
       'Compress',
       'Convert',
       'Resize',
+      'Crop',
     ]);
     expect(screen.getByRole('tab', { name: 'Compress' })).toHaveAttribute('aria-selected', 'true');
   });
