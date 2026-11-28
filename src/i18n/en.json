@@ -62,6 +62,34 @@
         "format": "Choose a format.",
         "quality": "Quality must be between 1 and 100."
       }
+    },
+    "resize": {
+      "label": "Resize",
+      "description": "Change the dimensions. Set exact pixels, a percentage, or pick a preset size.",
+      "modePixels": "Pixels",
+      "modePercent": "Percent",
+      "modePreset": "Preset",
+      "width": "Width (px)",
+      "height": "Height (px)",
+      "keepAspect": "Keep aspect ratio",
+      "keepAspectHint": "Leave one field empty to set it automatically. Both filled: the image fits inside that box.",
+      "percent": "Scale (%)",
+      "percentHint": "100% keeps the size, 50% halves each side.",
+      "preset": "Fit inside",
+      "presetHint": "Images are never enlarged by a preset. Smaller images stay as they are.",
+      "presets": {
+        "uhd": "4K UHD",
+        "fhd": "Full HD",
+        "hd": "HD",
+        "square": "Square post",
+        "thumb": "Thumbnail"
+      },
+      "errors": {
+        "size": "Enter a width and height between 1 and 16384 px.",
+        "sizeLocked": "Enter a width or height between 1 and 16384 px.",
+        "percent": "Percent must be between 1 and 1000.",
+        "preset": "Choose a preset."
+      }
     }
   }
 }

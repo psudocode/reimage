@@ -5,6 +5,8 @@ export interface ToolContext {
   signal: AbortSignal;
   progress(fraction: number): void;
   createCanvas(width: number, height: number): OffscreenCanvas;
+  /** Memory guard: the most pixels (width * height) a tool may produce. */
+  maxPixels: number;
 }
 
 /** Output settings a tool may set. The pipeline builder merges them over the defaults. */
