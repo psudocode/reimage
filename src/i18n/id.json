@@ -115,6 +115,23 @@
         "position": "Posisi harus antara 0 dan 100.",
         "edges": "Tiap sisi harus 0 sampai 99, dan sisi yang berlawanan harus menyisakan sebagian gambar."
       }
+    },
+    "removeBackground": {
+      "label": "Hapus latar",
+      "description": "Potong objek dan buat latar jadi transparan. Model AI berjalan di perangkatmu; gambarmu tidak pernah diunggah.",
+      "modelMissing": "Model belum ada di perangkat ini. Diunduh sekali, lalu disimpan untuk berikutnya.",
+      "download": "Unduh model (~44 MB)",
+      "downloading": "Mengunduh model…",
+      "cancel": "Batal",
+      "modelReady": "Model siap (bisa offline)",
+      "removeModel": "Hapus model",
+      "privacy": "Hanya file model yang diunduh, dari Hugging Face. Gambarmu tetap di browser.",
+      "softEdges": "Tepi halus",
+      "softEdgesHint": "Menjaga detail halus seperti rambut. Matikan untuk potongan tegas.",
+      "outputHint": "Hasil disimpan sebagai PNG agar tetap transparan. Gambar besar bisa lama di ponsel.",
+      "errors": {
+        "download": "Gagal mengunduh model. Periksa koneksi lalu coba lagi."
+      }
     }
   },
   "categories": {

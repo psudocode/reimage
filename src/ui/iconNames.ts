@@ -5,6 +5,7 @@ export const ICON_NAMES = [
   'compress',
   'convert',
   'transform',
+  'remove-background',
   'export',
   'upload',
   'download',
