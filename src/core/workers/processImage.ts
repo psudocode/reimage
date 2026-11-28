@@ -116,6 +116,7 @@ export async function processImage(
           onProgress((index + clamped) / (stepCount + 1));
         },
         createCanvas: deps.createCanvas,
+        maxPixels: getMaxPixels(deps.deviceMemoryGb),
       };
       await replace(tool.run(current, step.options, context));
       onProgress((index + 1) / (stepCount + 1));

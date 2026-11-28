@@ -75,6 +75,7 @@ describe('convert tool plugin', () => {
       signal: new AbortController().signal,
       progress,
       createCanvas: vi.fn(),
+      maxPixels: 1_000_000,
     });
     expect(out).toBe(input);
     expect(input.close).not.toHaveBeenCalled();

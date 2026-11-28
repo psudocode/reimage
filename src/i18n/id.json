@@ -62,6 +62,34 @@
         "format": "Pilih format.",
         "quality": "Kualitas harus antara 1 dan 100."
       }
+    },
+    "resize": {
+      "label": "Ubah ukuran",
+      "description": "Ubah dimensi gambar. Atur piksel persis, persentase, atau pilih ukuran preset.",
+      "modePixels": "Piksel",
+      "modePercent": "Persen",
+      "modePreset": "Preset",
+      "width": "Lebar (px)",
+      "height": "Tinggi (px)",
+      "keepAspect": "Pertahankan rasio",
+      "keepAspectHint": "Kosongkan salah satu kolom agar dihitung otomatis. Kalau keduanya diisi, gambar dimuat di dalam kotak itu.",
+      "percent": "Skala (%)",
+      "percentHint": "100% mempertahankan ukuran, 50% memperkecil tiap sisi setengahnya.",
+      "preset": "Muat di dalam",
+      "presetHint": "Preset tidak pernah memperbesar gambar. Gambar yang lebih kecil dibiarkan.",
+      "presets": {
+        "uhd": "4K UHD",
+        "fhd": "Full HD",
+        "hd": "HD",
+        "square": "Postingan persegi",
+        "thumb": "Thumbnail"
+      },
+      "errors": {
+        "size": "Isi lebar dan tinggi antara 1 dan 16384 px.",
+        "sizeLocked": "Isi lebar atau tinggi antara 1 dan 16384 px.",
+        "percent": "Persen harus antara 1 dan 1000.",
+        "preset": "Pilih preset."
+      }
     }
   }
 }

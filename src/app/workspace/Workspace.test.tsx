@@ -261,6 +261,7 @@ describe('Workspace', () => {
     expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
       'Compress',
       'Convert',
+      'Resize',
     ]);
     expect(screen.getByRole('tab', { name: 'Compress' })).toHaveAttribute('aria-selected', 'true');
   });
