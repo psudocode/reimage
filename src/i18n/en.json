@@ -116,6 +116,41 @@
         "edges": "Each edge must be 0 to 99, and opposite edges must leave part of the image."
       }
     },
+    "watermark": {
+      "label": "Watermark",
+      "description": "Stamp text or your logo on the image. Sizes are relative, so a batch of different sizes looks the same.",
+      "modeText": "Text",
+      "modeImage": "Logo",
+      "text": "Watermark text",
+      "color": "Color",
+      "logo": "Logo image",
+      "logoHint": "PNG with a transparent background works best. The file stays on your device.",
+      "size": { "text": "Text size", "image": "Logo width" },
+      "opacity": "Opacity",
+      "position": "Position",
+      "margin": "Margin",
+      "positions": {
+        "top-left": "Top left",
+        "top-center": "Top center",
+        "top-right": "Top right",
+        "middle-left": "Middle left",
+        "center": "Center",
+        "middle-right": "Middle right",
+        "bottom-left": "Bottom left",
+        "bottom-center": "Bottom center",
+        "bottom-right": "Bottom right"
+      },
+      "errors": {
+        "mode": "Choose text or logo.",
+        "text": "Enter a text of up to 200 characters.",
+        "color": "Choose a valid color.",
+        "logo": "Choose an image file for the logo.",
+        "size": "Size must be between 1 and 100.",
+        "opacity": "Opacity must be between 1 and 100.",
+        "margin": "Margin must be between 0 and 25.",
+        "position": "Choose a position."
+      }
+    },
     "stripMetadata": {
       "label": "Strip metadata",
       "description": "Remove the hidden data inside a photo before you share it. The picture itself looks the same.",
