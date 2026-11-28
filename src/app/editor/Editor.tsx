@@ -15,6 +15,8 @@ import { UploadButton } from './UploadButton.tsx';
 import { useEditorModel, type EditorModel, type Workspace } from './useEditorModel.ts';
 import { useIsMobile } from './useIsMobile.ts';
 
+const OPTIONS_ID = 'tool-options';
+
 interface EditorProps {
   workspace: Workspace;
   onFiles(files: File[]): void;
@@ -112,6 +114,7 @@ function EditorDesktop({ workspace, onFiles, skipped, selected, model }: LayoutP
   const t = useT();
   const { items, running } = workspace;
   const [dropping, setDropping] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(true);
 
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
@@ -148,52 +151,79 @@ function EditorDesktop({ workspace, onFiles, skipped, selected, model }: LayoutP
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <section
-          aria-label={t('editor.options')}
-          className="flex items-start gap-4 border-b border-slate-800 bg-slate-900 px-4 py-2"
-        >
-          <div className="max-h-[40vh] min-w-0 flex-1 overflow-y-auto">
-            <ToolSection workspace={workspace} model={model} panelClassName="max-w-md" />
-          </div>
-          <div className="flex shrink-0 flex-col items-end gap-2 text-sm">
+        <header className="flex items-center gap-4 border-b border-slate-800 bg-slate-900 px-4 py-2">
+          <h2 className="flex min-w-0 items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-violet-300">
+            <Icon name={model.tool.icon} className="size-4 shrink-0" />
+            <span className="truncate">{t(model.tool.labelKey)}</span>
+          </h2>
+          <div className="ml-auto flex items-center gap-4 text-sm">
             <Stats item={selected} preview={model.preview} />
-            <div className="flex items-center gap-3">
-              {running && <RunProgress items={items} />}
-              <ActionButton workspace={workspace} />
-            </div>
             <BatchSummary items={items} />
+            {running && <RunProgress items={items} />}
+            <ActionButton workspace={workspace} />
+            <button
+              type="button"
+              aria-expanded={optionsOpen}
+              aria-controls={OPTIONS_ID}
+              aria-label={t(optionsOpen ? 'editor.hideOptions' : 'editor.showOptions')}
+              title={t(optionsOpen ? 'editor.hideOptions' : 'editor.showOptions')}
+              onClick={() => setOptionsOpen(!optionsOpen)}
+              className="rounded-lg border border-slate-700 p-1.5 text-slate-300 hover:bg-slate-800"
+            >
+              <Icon name={optionsOpen ? 'chevron-right' : 'chevron-left'} className="size-4" />
+            </button>
           </div>
-        </section>
+        </header>
 
-        <div
-          aria-label={t('editor.canvas')}
-          role="region"
-          onDragOver={(event) => {
-            event.preventDefault();
-            if (!running) setDropping(true);
-          }}
-          onDragLeave={() => setDropping(false)}
-          onDrop={onDrop}
-          className={`flex-1 space-y-2 overflow-auto bg-slate-900/40 p-8 ${
-            dropping ? 'outline-2 -outline-offset-8 outline-dashed outline-violet-500' : ''
-          }`}
-        >
-          <div className="mx-auto max-w-2xl rounded-lg shadow-2xl shadow-black/60">
-            <Canvas
-              key={selected.id}
-              item={selected}
-              tool={model.tool}
-              options={workspace.options}
-              onOptionsChange={workspace.setOptions}
-              preview={model.preview}
-              locked={running}
-            />
+        <div className="flex min-h-0 flex-1">
+          <div
+            aria-label={t('editor.canvas')}
+            role="region"
+            onDragOver={(event) => {
+              event.preventDefault();
+              if (!running) setDropping(true);
+            }}
+            onDragLeave={() => setDropping(false)}
+            onDrop={onDrop}
+            className={`min-w-0 flex-1 space-y-2 overflow-auto bg-slate-900/40 p-6 ${
+              dropping ? 'outline-2 -outline-offset-8 outline-dashed outline-violet-500' : ''
+            }`}
+          >
+            <div className="mx-auto max-w-3xl rounded-lg shadow-2xl shadow-black/60">
+              <Canvas
+                key={selected.id}
+                item={selected}
+                tool={model.tool}
+                options={workspace.options}
+                onOptionsChange={workspace.setOptions}
+                preview={model.preview}
+                locked={running}
+              />
+            </div>
+            <div className="mx-auto max-w-3xl space-y-1">
+              <ItemNotes item={selected} />
+              <PreviewProblem message={model.preview.error} />
+              <SkippedNote count={skipped} />
+            </div>
           </div>
-          <div className="mx-auto max-w-2xl space-y-1">
-            <ItemNotes item={selected} />
-            <PreviewProblem message={model.preview.error} />
-            <SkippedNote count={skipped} />
-          </div>
+
+          {optionsOpen && (
+            <section
+              id={OPTIONS_ID}
+              aria-label={t('editor.options')}
+              className="w-72 shrink-0 overflow-y-auto border-l border-slate-800 bg-slate-900 p-4"
+            >
+              <Suspense
+                fallback={<p className="text-sm text-slate-400">{t('workspace.loading')}</p>}
+              >
+                <model.tool.Panel
+                  key={workspace.toolId}
+                  value={workspace.options}
+                  onChange={workspace.setOptions}
+                />
+              </Suspense>
+            </section>
+          )}
         </div>
 
         <Filmstrip
