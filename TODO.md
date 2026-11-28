@@ -15,7 +15,7 @@
 - [x] **Compress** tool (quality slider + target file size binary search)
 - [x] **Convert** tool (JPG, PNG, WebP, AVIF; HEIC input where supported)
 - [x] **Resize** tool (pixels, percentage, presets)
-- [ ] **Crop** tool (free crop + fixed ratio presets)
+- [x] **Crop** tool (free crop + fixed ratio presets)
 - [ ] Batch processing + ZIP export (`fflate`)
 - [ ] PWA + offline support (`vite-plugin-pwa`)
 - [ ] SEO landing pages + Playwright E2E, privacy, and accessibility (`axe-core`) tests

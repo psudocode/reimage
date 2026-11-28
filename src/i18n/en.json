@@ -90,6 +90,29 @@
         "percent": "Percent must be between 1 and 1000.",
         "preset": "Choose a preset."
       }
+    },
+    "crop": {
+      "label": "Crop",
+      "description": "Cut the image to a fixed ratio or a free box. Values are percentages, so one setting fits a whole batch.",
+      "modeRatio": "Fixed ratio",
+      "modeFree": "Free box",
+      "ratio": "Aspect ratio",
+      "custom": "Custom",
+      "ratioWidth": "Ratio width",
+      "ratioHeight": "Ratio height",
+      "offsetX": "Horizontal position (%)",
+      "offsetY": "Vertical position (%)",
+      "offsetHint": "The largest area with this ratio is kept. 50 = centred, 0 = left or top edge, 100 = right or bottom edge.",
+      "left": "Left (%)",
+      "top": "Top (%)",
+      "width": "Width (%)",
+      "height": "Height (%)",
+      "freeHint": "Left + width and top + height must not go past 100%.",
+      "errors": {
+        "box": "Enter a box inside the image: left and top 0-99, width and height 1-100, never past 100% in total.",
+        "ratio": "Choose a ratio. Custom values must be between 1 and 100.",
+        "offset": "Position must be between 0 and 100."
+      }
     }
   }
 }
