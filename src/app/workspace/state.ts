@@ -3,6 +3,8 @@ export type ItemStatus = 'ready' | 'processing' | 'done' | 'failed';
 export interface ItemResult {
   /** Object URL of the encoded blob; revoked when the item is removed or re-run. */
   url: string;
+  /** Kept so a ZIP can be built without re-reading the object URL. */
+  blob: Blob;
   fileName: string;
   width: number;
   height: number;

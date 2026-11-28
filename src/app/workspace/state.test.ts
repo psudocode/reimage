@@ -23,6 +23,7 @@ const result: ItemResult = {
   fileName: 'a-reimage.jpg',
   width: 10,
   height: 10,
+  blob: new Blob(),
   bytesAfter: 400,
   downscaled: false,
   targetMissed: false,

@@ -18,6 +18,7 @@ import { createImagePool } from '../../core/workers/imagePool.ts';
 import { getRegisteredRuntimes, getToolRuntimeById } from '../../tools/runtimeRegistry.ts';
 import { extensionForMime, outputFileName, splitAcceptedFiles, uniqueFileName } from './files.ts';
 import { buildPipeline } from './pipeline.ts';
+import { createZip } from './zip.ts';
 import {
   initialWorkspaceState,
   workspaceReducer,
@@ -39,6 +40,8 @@ export interface WorkspaceDeps {
   createId(): string;
   createObjectURL(blob: Blob): string;
   revokeObjectURL(url: string): void;
+  /** Hands a file to the browser's download flow. */
+  saveBlob(blob: Blob, fileName: string): void;
 }
 
 export const browserWorkspaceDeps: WorkspaceDeps = {
@@ -54,6 +57,14 @@ export const browserWorkspaceDeps: WorkspaceDeps = {
   createId: () => crypto.randomUUID(),
   createObjectURL: (blob) => URL.createObjectURL(blob),
   revokeObjectURL: (url) => URL.revokeObjectURL(url),
+  saveBlob(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+  },
 };
 
 function revokeItem(item: WorkspaceItem, deps: WorkspaceDeps) {
@@ -194,6 +205,7 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
           id: result.imageId,
           result: {
             url: d.createObjectURL(result.blob),
+            blob: result.blob,
             fileName,
             width: result.width,
             height: result.height,
@@ -218,6 +230,26 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
   }, [toolId, options, errors, ensureRunner]);
 
   const cancel = useCallback(() => handleRef.current?.cancel(), []);
+
+  const [zipping, setZipping] = useState(false);
+  const [zipError, setZipError] = useState<string | null>(null);
+  const downloadZip = useCallback(async () => {
+    const entries = stateRef.current.items.flatMap((item) =>
+      item.status === 'done' && item.result
+        ? [{ fileName: item.result.fileName, blob: item.result.blob }]
+        : [],
+    );
+    if (entries.length === 0) return;
+    setZipping(true);
+    setZipError(null);
+    try {
+      depsRef.current.saveBlob(await createZip(entries), 'reimage.zip');
+    } catch (error) {
+      setZipError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setZipping(false);
+    }
+  }, []);
 
   useEffect(
     () => () => {
@@ -248,5 +280,8 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
     clear,
     run,
     cancel,
+    downloadZip,
+    zipping,
+    zipError,
   };
 }
