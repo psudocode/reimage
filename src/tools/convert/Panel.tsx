@@ -37,7 +37,7 @@ export default function ConvertPanel({ value, onChange }: ToolPanelProps<Convert
             </label>
           ))}
         </div>
-        <p className="text-xs text-slate-500">{t(`tools.convert.hints.${value.format}`)}</p>
+        <p className="text-xs text-slate-400">{t(`tools.convert.hints.${value.format}`)}</p>
       </fieldset>
 
       {isLossyFormat(value.format) ? (
@@ -56,10 +56,10 @@ export default function ConvertPanel({ value, onChange }: ToolPanelProps<Convert
             onChange={(event) => set({ quality: Number(event.target.value) })}
             className="w-full"
           />
-          <p className="text-xs text-slate-500">{t('tools.convert.qualityHint')}</p>
+          <p className="text-xs text-slate-400">{t('tools.convert.qualityHint')}</p>
         </div>
       ) : (
-        <p className="text-xs text-slate-500">{t('tools.convert.losslessNote')}</p>
+        <p className="text-xs text-slate-400">{t('tools.convert.losslessNote')}</p>
       )}
 
       {errors.map((key) => (

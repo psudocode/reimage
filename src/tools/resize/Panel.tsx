@@ -78,7 +78,7 @@ export default function ResizePanel({ value, onChange }: ToolPanelProps<ResizeOp
             {t('tools.resize.keepAspect')}
           </label>
           {value.keepAspect && (
-            <p className="text-xs text-slate-500">{t('tools.resize.keepAspectHint')}</p>
+            <p className="text-xs text-slate-400">{t('tools.resize.keepAspectHint')}</p>
           )}
         </div>
       )}
@@ -101,7 +101,7 @@ export default function ResizePanel({ value, onChange }: ToolPanelProps<ResizeOp
             }
             className="w-full rounded border border-slate-700 bg-transparent px-2 py-1 text-sm"
           />
-          <p className="text-xs text-slate-500">{t('tools.resize.percentHint')}</p>
+          <p className="text-xs text-slate-400">{t('tools.resize.percentHint')}</p>
         </div>
       )}
 
@@ -127,13 +127,13 @@ export default function ResizePanel({ value, onChange }: ToolPanelProps<ResizeOp
                   />
                   {t(`tools.resize.presets.${preset.id}`)}
                 </span>
-                <span className="pl-6 text-xs text-slate-500">
+                <span className="pl-6 text-xs text-slate-400">
                   {preset.width} × {preset.height}
                 </span>
               </label>
             ))}
           </div>
-          <p className="text-xs text-slate-500">{t('tools.resize.presetHint')}</p>
+          <p className="text-xs text-slate-400">{t('tools.resize.presetHint')}</p>
         </fieldset>
       )}
 

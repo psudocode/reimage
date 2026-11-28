@@ -29,7 +29,7 @@ export function Workspace({ deps = browserWorkspaceDeps }: { deps?: WorkspaceDep
             {t('workspace.skipped').replace('{count}', String(skipped))}
           </p>
         )}
-        <p className="text-center text-sm text-slate-500">{t('workspace.empty')}</p>
+        <p className="text-center text-sm text-slate-400">{t('workspace.empty')}</p>
       </section>
     );
   }

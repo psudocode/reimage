@@ -21,7 +21,7 @@ export function Stats({ item, preview }: StatsProps) {
 
   if (!after) {
     return (
-      <span aria-live="polite" className="text-slate-500">
+      <span aria-live="polite" className="text-slate-400">
         {preview.status === 'error' ? '–' : '…'}
       </span>
     );
@@ -40,7 +40,7 @@ export function Stats({ item, preview }: StatsProps) {
         ({percent >= 0 ? '−' : '+'}
         {Math.abs(percent)}%)
       </span>
-      <span className="text-slate-500">
+      <span className="text-slate-400">
         {' '}
         · {mark}
         {after.width}×{after.height}

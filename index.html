@@ -3,14 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>reimage — Browser Image Toolkit</title>
+    <title>reimage — Free Browser Image Compressor, Converter, Resizer &amp; Cropper</title>
     <meta
       name="description"
-      content="Every image tool you need, right in your browser. No uploads, no sign-up, no limits."
+      content="Compress, convert, resize and crop images right in your browser. 100% client-side: no uploads, no sign-up, no limits. JPEG, PNG, WebP, AVIF."
     />
+    <meta name="theme-color" content="#020617" />
+    <link rel="canonical" href="https://reimage.awdi.my.id/" />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="reimage" />
+    <meta property="og:title" content="reimage — Free Browser Image Toolkit" />
+    <meta
+      property="og:description"
+      content="Compress, convert, resize and crop images in your browser. Your images never leave your device."
+    />
+    <meta property="og:url" content="https://reimage.awdi.my.id/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="reimage — Free Browser Image Toolkit" />
+    <meta
+      name="twitter:description"
+      content="Compress, convert, resize and crop images in your browser. No uploads."
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "reimage",
+        "url": "https://reimage.awdi.my.id/",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Any (modern web browser)",
+        "description": "Compress, convert, resize and crop images in your browser. Everything runs client-side; images are never uploaded.",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "inLanguage": ["en", "id"]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      reimage needs JavaScript to process images in your browser. Nothing is ever uploaded to a
+      server.
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
