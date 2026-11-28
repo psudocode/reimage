@@ -42,7 +42,7 @@ reimage is a free, open-source image toolkit. It lets you compress, convert, res
 ### Later
 
 - Background removal (an ML model that runs in the browser)
-- Before/after comparison slider
+- Before/after comparison slider (already live in the editor preview)
 - Images to PDF
 
 ## How it works
