@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { LocaleContext, messages, type Locale } from '../i18n/index.ts';
 import { Workspace } from './workspace/Workspace.tsx';
+import { PrototypeEditor } from '../prototype/editor/index.tsx'; // PROTOTYPE
+
 
 export function App() {
   const [locale, setLocale] = useState<Locale>('en');
@@ -44,9 +46,9 @@ export function App() {
           </div>
         </header>
 
-        <main className="flex-1 mx-auto w-full max-w-5xl px-6 py-8 space-y-6">
+        <main className="flex-1 mx-auto w-full max-w-none px-6 py-8 space-y-6">
           <p className="text-slate-300">{t.tagline}</p>
-          <Workspace />
+          {new URLSearchParams(location.search).has('variant') ? <PrototypeEditor /> : <Workspace />} {/* PROTOTYPE: ?variant=A|B|C */}
         </main>
       </div>
     </LocaleContext.Provider>
