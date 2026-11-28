@@ -115,6 +115,29 @@
         "position": "Position must be between 0 and 100.",
         "edges": "Each edge must be 0 to 99, and opposite edges must leave part of the image."
       }
+    },
+    "expand": {
+      "label": "Expand canvas",
+      "description": "Add space around the image, filled with a colour or left transparent. Padding is in pixels.",
+      "modeAll": "All sides",
+      "modeSides": "Per side",
+      "padding": "Padding (px)",
+      "top": "Top (px)",
+      "right": "Right (px)",
+      "bottom": "Bottom (px)",
+      "left": "Left (px)",
+      "background": "Background",
+      "bgTransparent": "Transparent",
+      "bgColor": "Colour",
+      "color": "Fill colour",
+      "transparentHint": "Transparent needs PNG, WebP or AVIF. JPEG has no transparency, so it is filled with white.",
+      "errors": {
+        "mode": "Choose a padding mode.",
+        "padding": "Padding must be a whole number between 0 and 8192 px.",
+        "empty": "Add padding on at least one side.",
+        "background": "Choose a background.",
+        "color": "Pick a valid colour."
+      }
     }
   },
   "categories": {

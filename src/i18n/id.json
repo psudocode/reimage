@@ -115,6 +115,29 @@
         "position": "Posisi harus antara 0 dan 100.",
         "edges": "Tiap sisi harus 0 sampai 99, dan sisi yang berlawanan harus menyisakan sebagian gambar."
       }
+    },
+    "expand": {
+      "label": "Perluas kanvas",
+      "description": "Tambah ruang di sekeliling gambar, diisi warna atau dibiarkan transparan. Padding dalam piksel.",
+      "modeAll": "Semua sisi",
+      "modeSides": "Per sisi",
+      "padding": "Padding (px)",
+      "top": "Atas (px)",
+      "right": "Kanan (px)",
+      "bottom": "Bawah (px)",
+      "left": "Kiri (px)",
+      "background": "Latar",
+      "bgTransparent": "Transparan",
+      "bgColor": "Warna",
+      "color": "Warna isi",
+      "transparentHint": "Transparan butuh PNG, WebP, atau AVIF. JPEG tidak mendukung transparansi, jadi diisi putih.",
+      "errors": {
+        "mode": "Pilih mode padding.",
+        "padding": "Padding harus bilangan bulat antara 0 dan 8192 px.",
+        "empty": "Tambahkan padding di minimal satu sisi.",
+        "background": "Pilih latar.",
+        "color": "Pilih warna yang valid."
+      }
     }
   },
   "categories": {

@@ -2,6 +2,7 @@
 export const ICON_NAMES = [
   'crop',
   'resize',
+  'expand',
   'compress',
   'convert',
   'transform',

@@ -17,6 +17,12 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="m3 21 7-7" />
     </>
   ),
+  expand: (
+    <>
+      <rect x="8" y="8" width="8" height="8" rx="1" />
+      <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="3 3" />
+    </>
+  ),
   compress: (
     <>
       <path d="m4 14 6 0 0 6" />
