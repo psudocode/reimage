@@ -145,6 +145,8 @@
     "close": "Tutup",
     "filmstrip": "Gambar",
     "options": "Opsi alat",
+    "hideOptions": "Sembunyikan opsi",
+    "showOptions": "Tampilkan opsi",
     "canvas": "Kanvas edit",
     "cropBox": "Area potong",
     "cropBoxHint": "Seret, atau pakai tombol panah untuk menggeser. Shift menggeser lebih jauh.",

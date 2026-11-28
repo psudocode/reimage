@@ -212,6 +212,27 @@ describe('Workspace', () => {
     );
   });
 
+  it('lets the options panel be hidden to give the canvas the full width', async () => {
+    const { add } = setup();
+    add(image('photo.jpg'));
+    await screen.findByRole('radio', { name: /Target file size/ });
+
+    const toggle = screen.getByRole('button', { name: 'Hide options' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(toggle);
+
+    expect(screen.queryByRole('radio', { name: /Target file size/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show options' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+    // Apply stays reachable while the panel is hidden.
+    expect(apply()).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show options' }));
+    expect(await screen.findByRole('radio', { name: /Target file size/ })).toBeInTheDocument();
+  });
+
   it('offers every finished image for download from the filmstrip', async () => {
     const { harness, add } = setup();
     add(image('a.jpg'), image('b.jpg'));

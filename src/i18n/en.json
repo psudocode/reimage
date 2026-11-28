@@ -145,6 +145,8 @@
     "close": "Close",
     "filmstrip": "Images",
     "options": "Tool options",
+    "hideOptions": "Hide options",
+    "showOptions": "Show options",
     "canvas": "Editing canvas",
     "cropBox": "Crop area",
     "cropBoxHint": "Drag, or use the arrow keys to move it. Shift moves in bigger steps.",
