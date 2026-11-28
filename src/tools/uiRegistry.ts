@@ -3,6 +3,7 @@ import { convertUI } from './convert/ui.ts';
 import { cropUI } from './crop/ui.ts';
 import { imagesToPdfUI } from './images-to-pdf/ui.ts';
 import { resizeUI } from './resize/ui.ts';
+import { watermarkUI } from './watermark/ui.ts';
 import { stripMetadataUI } from './strip-metadata/ui.ts';
 import type { ToolUI } from './types.ts';
 
@@ -14,6 +15,7 @@ const registeredUIs: ToolUI<any>[] = [
   convertUI,
   resizeUI,
   cropUI,
+  watermarkUI,
   stripMetadataUI,
   imagesToPdfUI,
 ];

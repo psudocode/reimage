@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://reimage.awdi.my.id/sitemap.xml

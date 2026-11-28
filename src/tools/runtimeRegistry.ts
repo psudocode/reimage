@@ -4,6 +4,7 @@ import { convertRuntime } from './convert/runtime.ts';
 import { cropRuntime } from './crop/runtime.ts';
 import { imagesToPdfRuntime } from './images-to-pdf/runtime.ts';
 import { resizeRuntime } from './resize/runtime.ts';
+import { watermarkRuntime } from './watermark/runtime.ts';
 import { stripMetadataRuntime } from './strip-metadata/runtime.ts';
 import type { ToolRuntime } from './types.ts';
 
@@ -16,6 +17,7 @@ const registeredRuntimes: ToolRuntime<any>[] = [
   convertRuntime,
   resizeRuntime,
   cropRuntime,
+  watermarkRuntime,
   stripMetadataRuntime,
   imagesToPdfRuntime,
 ];

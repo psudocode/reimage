@@ -18,14 +18,14 @@
 - [x] **Crop** tool (free crop + fixed ratio presets)
 - [ ] Batch processing + ZIP export (`fflate`)
 - [ ] PWA + offline support (`vite-plugin-pwa`)
-- [ ] SEO landing pages + Playwright E2E, privacy, and accessibility (`axe-core`) tests
+- [x] SEO landing pages + Playwright E2E, privacy, and accessibility (`axe-core`) tests
 
 ## Phase 2: v1
 
 - [ ] Rotate & flip with automatic EXIF orientation fix
 - [ ] Expand canvas (padding / background color)
 - [ ] Merge & collage (side by side, stacked, grid)
-- [ ] Watermark (text or logo)
+- [x] Watermark (text or logo)
 - [x] Strip metadata (EXIF & GPS)
 - [ ] Pipelines (chain steps + IndexedDB presets via `idb-keyval`)
 

@@ -149,3 +149,7 @@ reimage is free, and its core tools will stay free. If it saves you time, you ca
 ## License
 
 MIT © reimage contributors _(LICENSE & THIRD_PARTY_NOTICES.md coming soon)_.
+
+## End-to-end tests
+
+Playwright runs against the production build (`pnpm test:e2e`; first time: `pnpm exec playwright install chromium`). Suites in `e2e/`: SEO metadata, the add → Compress → download flow, a privacy test (no request leaves the origin while an image is processed), and axe-core accessibility checks (WCAG 2.1 A/AA) on the landing page and the editor.

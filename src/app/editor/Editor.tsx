@@ -185,6 +185,7 @@ function EditorDesktop({ workspace, onFiles, skipped, selected, model }: LayoutP
             }}
             onDragLeave={() => setDropping(false)}
             onDrop={onDrop}
+            tabIndex={0}
             className={`min-w-0 flex-1 space-y-2 overflow-auto bg-slate-900/40 p-6 ${
               dropping ? 'outline-2 -outline-offset-8 outline-dashed outline-violet-500' : ''
             }`}
@@ -294,6 +295,7 @@ function EditorMobile({ workspace, onFiles, skipped, selected, model }: LayoutPr
         }}
         onPointerUp={endSwipe}
         onPointerCancel={() => (swipeStart.current = null)}
+        tabIndex={0}
         className="flex-1 space-y-2 overflow-auto bg-slate-900/40 p-3"
       >
         <div className="mx-auto max-w-md rounded-lg shadow-2xl shadow-black/60">

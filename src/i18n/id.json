@@ -116,6 +116,41 @@
         "edges": "Tiap sisi harus 0 sampai 99, dan sisi yang berlawanan harus menyisakan sebagian gambar."
       }
     },
+    "watermark": {
+      "label": "Watermark",
+      "description": "Bubuhkan teks atau logo pada gambar. Ukurannya relatif, jadi gambar berbagai ukuran tampil seragam.",
+      "modeText": "Teks",
+      "modeImage": "Logo",
+      "text": "Teks watermark",
+      "color": "Warna",
+      "logo": "Gambar logo",
+      "logoHint": "Disarankan PNG dengan latar transparan. File tetap di perangkatmu.",
+      "size": { "text": "Ukuran teks", "image": "Lebar logo" },
+      "opacity": "Opasitas",
+      "position": "Posisi",
+      "margin": "Margin",
+      "positions": {
+        "top-left": "Kiri atas",
+        "top-center": "Tengah atas",
+        "top-right": "Kanan atas",
+        "middle-left": "Tengah kiri",
+        "center": "Tengah",
+        "middle-right": "Tengah kanan",
+        "bottom-left": "Kiri bawah",
+        "bottom-center": "Tengah bawah",
+        "bottom-right": "Kanan bawah"
+      },
+      "errors": {
+        "mode": "Pilih teks atau logo.",
+        "text": "Isi teks maksimal 200 karakter.",
+        "color": "Pilih warna yang valid.",
+        "logo": "Pilih file gambar untuk logo.",
+        "size": "Ukuran harus antara 1 dan 100.",
+        "opacity": "Opasitas harus antara 1 dan 100.",
+        "margin": "Margin harus antara 0 dan 25.",
+        "position": "Pilih posisi."
+      }
+    },
     "stripMetadata": {
       "label": "Hapus metadata",
       "description": "Buang data tersembunyi di dalam foto sebelum dibagikan. Gambarnya sendiri tetap terlihat sama.",

@@ -51,7 +51,7 @@ export default function CompressPanel({ value, onChange }: ToolPanelProps<Compre
             onChange={(event) => set({ quality: Number(event.target.value) })}
             className="w-full"
           />
-          <p className="text-xs text-slate-500">{t('tools.compress.qualityHint')}</p>
+          <p className="text-xs text-slate-400">{t('tools.compress.qualityHint')}</p>
         </div>
       ) : (
         <div className="space-y-1">
@@ -72,7 +72,7 @@ export default function CompressPanel({ value, onChange }: ToolPanelProps<Compre
             aria-invalid={errors.length > 0}
             className="w-32 rounded border border-slate-700 bg-slate-900 px-2 py-1 text-sm"
           />
-          <p className="text-xs text-slate-500">{t('tools.compress.targetHint')}</p>
+          <p className="text-xs text-slate-400">{t('tools.compress.targetHint')}</p>
         </div>
       )}
 
