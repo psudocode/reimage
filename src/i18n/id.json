@@ -150,6 +150,18 @@
         "margin": "Margin harus antara 0 dan 25.",
         "position": "Pilih posisi."
       }
+    },
+    "stripMetadata": {
+      "label": "Hapus metadata",
+      "description": "Buang data tersembunyi di dalam foto sebelum dibagikan. Gambarnya sendiri tetap terlihat sama.",
+      "removesLocation": "Lokasi GPS dan koordinat peta",
+      "removesCamera": "Kamera, model ponsel, lensa, dan tanggal pengambilan",
+      "removesOther": "Thumbnail tertanam, detail XMP dan IPTC",
+      "quality": "Kualitas",
+      "qualityHint": "JPEG, WebP, dan AVIF disimpan ulang tanpa metadata, jadi kualitas tinggi menjaganya tetap tajam. PNG tetap lossless.",
+      "errors": {
+        "quality": "Kualitas harus antara 1 dan 100."
+      }
     }
   },
   "categories": {

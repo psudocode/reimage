@@ -50,6 +50,12 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="M4 20h16" />
     </>
   ),
+  shield: (
+    <>
+      <path d="M12 3 4 6v6c0 4.5 3.2 8 8 9 4.8-1 8-4.5 8-9V6l-8-3Z" />
+      <path d="m9 12 2 2 4-4" />
+    </>
+  ),
   upload: (
     <>
       <path d="M12 16V4" />
