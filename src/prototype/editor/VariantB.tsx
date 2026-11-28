@@ -1,7 +1,7 @@
 // PROTOTYPE variant B: "Canva-like", scaled to MANY tools.
 // Rail = categories (stays short as tools grow), flyout = tools of that category, search finds any tool.
 // Only compress/convert/resize/crop are real; the rest are placeholders to test the navigation.
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Stage, Stats, ToolOptions, usePreview, type Opts, type Img, type ToolId } from './shared.tsx';
 
 interface T { id: string; label: string; icon: string; real?: boolean }
@@ -27,6 +27,13 @@ const CATS: { id: string; label: string; icon: string; tools: T[] }[] = [
 ];
 const ALL = CATS.flatMap((c) => c.tools.map((t) => ({ ...t, cat: c.id })));
 
+function useIsMobile() {
+  const mq = '(max-width: 767px)';
+  const [m, setM] = useState(() => matchMedia(mq).matches);
+  useEffect(() => { const l = matchMedia(mq); const h = () => setM(l.matches); l.addEventListener('change', h); return () => l.removeEventListener('change', h); }, []);
+  return m;
+}
+
 interface P { images: Img[]; current: Img; index: number; setIndex(i: number): void; o: Opts; set(p: Partial<Opts>): void; add(f: FileList): void }
 export function VariantB({ images, current, index, setIndex, o, set, add }: P) {
   const preview = usePreview(current, o);
@@ -36,6 +43,41 @@ export function VariantB({ images, current, index, setIndex, o, set, add }: P) {
   const pick = (t: T) => { setActive(t.id); if (t.real) set({ tool: t.id as ToolId }); };
   const shown = q ? ALL.filter((t) => t.label.toLowerCase().includes(q.toLowerCase())) : CATS.find((c) => c.id === cat)!.tools;
   const activeTool = ALL.find((t) => t.id === active)!;
+  const mobile = useIsMobile();
+  const [searching, setSearching] = useState(false);
+  if (mobile) return (
+    // Mobile: canvas first. Bottom = options strip, tool chips (scroll sideways), category tab bar. Thumbs collapse to a counter.
+    <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-slate-950 pt-12">
+      <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-900 px-3 py-2">
+        <div className="min-w-0 flex-1 truncate text-xs"><Stats img={current} preview={preview} /></div>
+        <button onClick={() => setSearching(!searching)} aria-label="search tools" className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm">🔍</button>
+        <button className="rounded-lg bg-violet-600 px-3 py-1.5 text-sm font-semibold">⬇ Save</button>
+      </div>
+      <div className="flex-1 overflow-auto bg-slate-900/40 p-3">
+        <div className="mx-auto max-w-md rounded-lg shadow-2xl shadow-black/60"><Stage img={current} o={o} set={set} preview={preview} /></div>
+        {images.length > 1 && <p className="mt-2 text-center text-xs text-slate-500">{index + 1} / {images.length}</p>}
+      </div>
+      <div className="max-h-40 overflow-y-auto border-t border-slate-800 bg-slate-900 px-4 py-3">
+        <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-violet-300">{activeTool.icon} {activeTool.label}</div>
+        {activeTool.real ? <ToolOptions o={o} set={set} /> : <p className="text-sm text-slate-500">Placeholder tool for this prototype.</p>}
+      </div>
+      {searching && <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search tools…" className="mx-3 mb-2 rounded-lg bg-slate-800 px-3 py-2 text-sm" />}
+      <div className="flex gap-2 overflow-x-auto border-t border-slate-800 bg-slate-900/80 px-3 py-2">
+        {shown.map((t) => (
+          <button key={t.id} onClick={() => pick(t)} className={`flex w-16 shrink-0 flex-col items-center gap-0.5 rounded-xl border px-1 py-2 text-[11px] ${active === t.id ? 'border-violet-500 bg-violet-600/20 text-white' : 'border-slate-800 text-slate-300'}`}>
+            <span className="text-xl">{t.icon}</span><span className="w-full truncate text-center">{t.label}</span>
+          </button>
+        ))}
+      </div>
+      <nav className="flex overflow-x-auto border-t border-slate-800 bg-slate-900 pb-[env(safe-area-inset-bottom)]">
+        {CATS.map((c) => (
+          <button key={c.id} onClick={() => { setCat(c.id); setQ(''); setSearching(false); }} className={`flex min-w-[4.5rem] flex-1 flex-col items-center py-2 text-[11px] ${!q && cat === c.id ? 'text-violet-400' : 'text-slate-500'}`}>
+            <span className="text-lg">{c.icon}</span>{c.label}
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
   return (
     <div className="flex h-[calc(100vh-11rem)] min-h-[32rem] overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
       <nav className="flex w-20 flex-col items-center gap-1 overflow-y-auto border-r border-slate-800 bg-slate-900 py-3">

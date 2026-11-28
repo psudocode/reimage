@@ -35,7 +35,7 @@ export function PrototypeEditor() {
   return (
     <>
       {variant === 'B' ? <VariantB {...props} /> : variant === 'C' ? <VariantC {...props} /> : <VariantA {...props} />}
-      <div className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-xl">
+      <div className="fixed bottom-4 max-md:bottom-auto max-md:top-1.5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-xl">
         <button onClick={() => go(VARIANTS[(i + 2) % 3]![0])} aria-label="previous variant">←</button>
         <span>{VARIANTS[Math.max(i, 0)]![0]} ({VARIANTS[Math.max(i, 0)]![1]})</span>
         <button onClick={() => go(VARIANTS[(i + 1) % 3]![0])} aria-label="next variant">→</button>
