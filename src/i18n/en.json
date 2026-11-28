@@ -90,6 +90,31 @@
         "percent": "Percent must be between 1 and 1000.",
         "preset": "Choose a preset."
       }
+    },
+    "crop": {
+      "label": "Crop",
+      "description": "Cut away the parts you don't need. Pick a fixed ratio, or trim each edge freely. Values are relative, so a batch of different sizes is cropped the same way.",
+      "modeRatio": "Fixed ratio",
+      "modeFree": "Free",
+      "ratio": "Aspect ratio",
+      "custom": "Custom",
+      "customWidth": "Ratio width",
+      "customHeight": "Ratio height",
+      "positionX": "Horizontal position",
+      "positionY": "Vertical position",
+      "ratioHint": "Keeps the largest area with that ratio. Position picks which part stays when the image is wider or taller.",
+      "left": "Trim left (%)",
+      "top": "Trim top (%)",
+      "right": "Trim right (%)",
+      "bottom": "Trim bottom (%)",
+      "freeHint": "Percent of the image removed from each edge. At least 1% of each side must remain.",
+      "errors": {
+        "mode": "Choose a crop mode.",
+        "ratio": "Choose a ratio.",
+        "customRatio": "Enter whole numbers between 1 and 100 for the ratio.",
+        "position": "Position must be between 0 and 100.",
+        "edges": "Each edge must be 0 to 99, and opposite edges must leave part of the image."
+      }
     }
   }
 }
