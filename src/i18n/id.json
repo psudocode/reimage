@@ -90,6 +90,31 @@
         "percent": "Persen harus antara 1 dan 1000.",
         "preset": "Pilih preset."
       }
+    },
+    "crop": {
+      "label": "Potong",
+      "description": "Buang bagian yang tidak perlu. Pilih rasio tetap, atau pangkas tiap sisi secara bebas. Nilainya relatif, jadi gambar berbagai ukuran dipotong dengan cara yang sama.",
+      "modeRatio": "Rasio tetap",
+      "modeFree": "Bebas",
+      "ratio": "Rasio aspek",
+      "custom": "Kustom",
+      "customWidth": "Lebar rasio",
+      "customHeight": "Tinggi rasio",
+      "positionX": "Posisi horizontal",
+      "positionY": "Posisi vertikal",
+      "ratioHint": "Mengambil area terbesar dengan rasio itu. Posisi menentukan bagian yang dipertahankan saat gambar lebih lebar atau lebih tinggi.",
+      "left": "Pangkas kiri (%)",
+      "top": "Pangkas atas (%)",
+      "right": "Pangkas kanan (%)",
+      "bottom": "Pangkas bawah (%)",
+      "freeHint": "Persen gambar yang dibuang dari tiap sisi. Minimal 1% dari tiap sisi harus tersisa.",
+      "errors": {
+        "mode": "Pilih mode potong.",
+        "ratio": "Pilih rasio.",
+        "customRatio": "Isi bilangan bulat antara 1 dan 100 untuk rasio.",
+        "position": "Posisi harus antara 0 dan 100.",
+        "edges": "Tiap sisi harus 0 sampai 99, dan sisi yang berlawanan harus menyisakan sebagian gambar."
+      }
     }
   }
 }
