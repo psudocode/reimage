@@ -17,7 +17,7 @@
 - [x] **Resize** tool (pixels, percentage, presets)
 - [x] **Crop** tool (free crop + fixed ratio presets)
 - [ ] Batch processing + ZIP export (`fflate`)
-- [ ] PWA + offline support (`vite-plugin-pwa`)
+- [x] PWA + offline support (`vite-plugin-pwa`)
 - [ ] SEO landing pages + Playwright E2E, privacy, and accessibility (`axe-core`) tests
 
 ## Phase 2: v1

@@ -163,5 +163,12 @@
       "w": "left"
     },
     "saving": "Working…"
+  },
+  "pwa": {
+    "updateAvailable": "A new version is available.",
+    "reload": "Reload",
+    "later": "Later",
+    "offlineReady": "Ready to work offline.",
+    "dismiss": "Dismiss"
   }
 }
