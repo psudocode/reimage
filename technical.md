@@ -115,7 +115,9 @@ sequenceDiagram
 ```
 re-image/
 ├─ src/
-│  ├─ app/                # routes, layout, providers, i18n setup
+│  ├─ app/                # layout, providers, i18n setup
+│  │  ├─ editor/          # editor layout (desktop + mobile), canvas, live preview
+│  │  └─ workspace/       # image list state, useWorkspace, pipeline builder
 │  ├─ core/
 │  │  ├─ job/             # Job, JobRunner, progress events
 │  │  ├─ pipeline/        # Pipeline model, (de)serialisation, validation
@@ -218,8 +220,11 @@ export interface ToolRuntime<O> {
 export interface ToolUI<O> {
   id: string; // same id as the matching ToolRuntime
   labelKey: string; // i18n key
-  icon: string;
+  category: ToolCategoryId; // which rail category lists it (src/tools/categories.ts)
+  icon: IconName; // an SVG from src/ui/Icon.tsx
   Panel: React.ComponentType<{ value: O; onChange(o: O): void }>;
+  // Optional interactive layer drawn over the original on the canvas (e.g. the crop box).
+  Overlay?: React.ComponentType<{ value: O; onChange(o: O): void; imageSize: Size }>;
 }
 
 export interface ToolContext {
@@ -231,8 +236,24 @@ export interface ToolContext {
 
 - `run` runs **inside a worker**. It must be pure: no DOM, no network.
 - A tool is two objects with the same `id`: a `ToolRuntime` (registered in `runtimeRegistry.ts`, loaded by the worker) and a `ToolUI` (registered in `uiRegistry.ts`, loaded by the app). Options types, defaults and `validate` live in a shared React-free `options.ts`. ESLint forbids React and UI imports on the worker side, and `size-limit` caps the worker bundle. See [ADR 002](docs/adr/002-split-tool-runtime-and-ui.md).
+- The editor builds its category rail and tool grid from `uiRegistry.ts` (see [Editor UI](#editor-ui-and-live-preview)): a new tool appears there by registering, with no layout code to touch.
 - Output encoding is **not** a tool step. It happens once at the end of the pipeline (see [Codecs](#8-codecs)).
 - Multi-input tools (merge/collage) implement `runMany(inputs: ImageBitmap[], …)` on the `ToolRuntime` and are flagged `kind: 'many-to-one'`.
+
+---
+
+## Editor UI and live preview
+
+With no images the app is a drop zone. Once there are images it becomes an editor (`src/app/editor`):
+
+- **Desktop:** category rail (left), tool grid with search, canvas in the middle, an options toolbar with the main action on top, and a filmstrip of images below.
+- **Mobile (< 768 px):** full screen. Top bar (size stats, search, upload, Apply/Download), canvas, options strip, sideways tool chips and a category tab bar. The filmstrip becomes an "n / N" marker with prev/next, swipe on the canvas, and a bottom sheet with the full list.
+- The rail and tool grid are generated from `uiRegistry.ts` (`groupToolsByCategory`); search filters on the translated label.
+- **Main action:** Apply runs the batch with the current tool; once the selected image has a result it turns into a Download link for that file. Changing the tool or its options drops all results, so a stale file can never be downloaded.
+
+**Live preview.** After the options settle (250 ms debounce) the selected image goes through the same pipeline in the worker pool, but on a copy whose longest side is at most 1024 px (`ProcessRequest.previewMaxEdge`). The original is still decoded under the `limits.ts` pixel guard, so the memory rules are unchanged. The result carries `previewScale`; the UI scales it back up for the "before → ≈after" size and dimensions (bytes ∝ pixels, so `1/scale²`). A target-size budget is scaled down the same way before encoding. These numbers are estimates and are marked "≈"; the real numbers replace them after Apply. Answers that arrive out of order are dropped, previews pause while a job runs, and every preview object URL is revoked when replaced.
+
+**Canvas.** Tools without an `Overlay` show a before/after slider (drag, or arrow keys on the handle). A tool with an `Overlay` shows the original with its layer on top. Crop's box is a pure view of `CropOptions` (`crop/box.ts`): dragging writes percent edges (free mode) or the position (fixed ratio, slide only), so one crop still means the same thing for every image in a batch. The box and handles are keyboard operable (arrows, Shift for larger steps).
 
 ---
 
@@ -415,7 +436,7 @@ Tools and formats that the browser can't support are hidden or shown with an exp
 1. Create `src/tools/<tool-id>/` with:
    - `options.ts`: the options type, defaults and `validate` (no React)
    - `runtime.ts`: exports a `ToolRuntime<Options>` (worker side, no React)
-   - `ui.ts`: exports a `ToolUI<Options>` with a lazy `Panel`
+   - `ui.ts`: exports a `ToolUI<Options>` with a `category`, an `icon` and a lazy `Panel` (plus an optional lazy `Overlay` for on-canvas editing)
    - `Panel.tsx`: the options UI
    - `<tool-id>.test.ts`: unit tests with fixtures
 2. Register the runtime in `src/tools/runtimeRegistry.ts` and the UI in `src/tools/uiRegistry.ts`.
@@ -457,7 +478,8 @@ import type { ToolUI } from '../types';
 export const flipUI: ToolUI<FlipOptions> = {
   id: 'flip',
   labelKey: 'tools.flip.label',
-  icon: 'flip-horizontal',
+  category: 'transform',
+  icon: 'transform', // add a drawing to src/ui/Icon.tsx and iconNames.ts for a dedicated icon
   Panel: lazy(() => import('./Panel.tsx')),
 };
 ```

@@ -44,7 +44,7 @@ export function App() {
           </div>
         </header>
 
-        <main className="flex-1 mx-auto w-full max-w-5xl px-6 py-8 space-y-6">
+        <main className="flex-1 mx-auto w-full max-w-[100rem] px-4 py-6 space-y-4 md:px-6">
           <p className="text-slate-300">{t.tagline}</p>
           <Workspace />
         </main>

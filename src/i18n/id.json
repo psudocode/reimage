@@ -116,5 +116,50 @@
         "edges": "Tiap sisi harus 0 sampai 99, dan sisi yang berlawanan harus menyisakan sebagian gambar."
       }
     }
+  },
+  "categories": {
+    "transform": "Ubah",
+    "export": "Ekspor"
+  },
+  "editor": {
+    "railLabel": "Kategori alat",
+    "toolsLabel": "Alat",
+    "searchLabel": "Cari alat",
+    "searchPlaceholder": "Cari alat…",
+    "noMatch": "Tidak ada alat yang cocok dengan “{query}”.",
+    "upload": "Unggah",
+    "apply": "Terapkan",
+    "download": "Unduh",
+    "before": "Sebelum",
+    "after": "Sesudah",
+    "compareLabel": "Sebelum dan sesudah",
+    "compareHint": "Gunakan tombol panah untuk menggeser pembatas.",
+    "previewLoading": "Memperbarui pratinjau…",
+    "previewError": "Pratinjau gagal: {message}",
+    "previewNote": "Pratinjau memakai salinan yang lebih kecil. Ukuran file hanya perkiraan.",
+    "estimated": "≈",
+    "position": "{current} / {total}",
+    "previous": "Gambar sebelumnya",
+    "next": "Gambar berikutnya",
+    "allImages": "Semua gambar",
+    "close": "Tutup",
+    "filmstrip": "Gambar",
+    "options": "Opsi alat",
+    "canvas": "Kanvas edit",
+    "cropBox": "Area potong",
+    "cropBoxHint": "Seret, atau pakai tombol panah untuk menggeser. Shift menggeser lebih jauh.",
+    "cropHandle": "Ubah ukuran potongan",
+    "cropFixedHint": "Rasio tetap: seret untuk menggeser kotak. Pilih Bebas untuk mengubah ukurannya.",
+    "handles": {
+      "nw": "kiri atas",
+      "n": "atas",
+      "ne": "kanan atas",
+      "e": "kanan",
+      "se": "kanan bawah",
+      "s": "bawah",
+      "sw": "kiri bawah",
+      "w": "kiri"
+    },
+    "saving": "Memproses…"
   }
 }

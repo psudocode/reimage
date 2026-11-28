@@ -1,5 +1,5 @@
 import * as Comlink from 'comlink';
-import type { ImageResult, InputImage, Job, JobStatus } from '../pipeline/types.ts';
+import type { ImageResult, InputImage, Job, JobStatus, Pipeline } from '../pipeline/types.ts';
 import { PoolAbortError, type WorkerPool } from '../workers/pool.ts';
 import type { ImageWorkerApi } from '../workers/image.worker.ts';
 
@@ -39,6 +39,17 @@ export interface JobHandle {
   cancel(): void;
 }
 
+/** Longest side, in pixels, of the downscaled copy a live preview runs on. */
+export const PREVIEW_MAX_EDGE = 1024;
+
+export interface PreviewRequest {
+  imageId: string;
+  file: File;
+  pipeline: Pipeline;
+  /** Defaults to `PREVIEW_MAX_EDGE`. */
+  maxEdge?: number;
+}
+
 function toError(value: unknown): Error {
   return value instanceof Error ? value : new Error(String(value));
 }
@@ -52,6 +63,23 @@ export class JobRunner {
 
   constructor(pool: ImageWorkerPoolLike) {
     this.pool = pool;
+  }
+
+  /**
+   * Runs one image through a pipeline on a downscaled copy, for live preview.
+   * The result is small and fast; `previewScale` says how far it was shrunk.
+   * Shares the job pool, so it never starts more workers than a normal run.
+   */
+  preview(request: PreviewRequest, signal?: AbortSignal): Promise<ImageResult> {
+    const { imageId, file, pipeline, maxEdge = PREVIEW_MAX_EDGE } = request;
+    return this.pool.run(
+      (api, ctx) =>
+        api.process(
+          { imageId, file, pipeline, attempt: ctx.attempt, previewMaxEdge: maxEdge },
+          Comlink.proxy(() => {}),
+        ),
+      { weight: 0, signal },
+    );
   }
 
   start(job: Job, events: JobEvents = {}): JobHandle {

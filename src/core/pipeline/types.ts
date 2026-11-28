@@ -49,6 +49,11 @@ export interface ImageResult {
   downscaled?: boolean;
   /** True when a target file size was requested but could not be reached. */
   targetMissed?: boolean;
+  /**
+   * Preview runs only: width of the processed source divided by the original
+   * width (1 = full size). Lets the UI scale the size and dimensions back up.
+   */
+  previewScale?: number;
 }
 
 export interface Env {
