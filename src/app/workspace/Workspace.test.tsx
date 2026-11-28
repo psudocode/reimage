@@ -15,6 +15,7 @@ interface Harness {
   dispose: ReturnType<typeof vi.fn>;
   createRunner: ReturnType<typeof vi.fn>;
   revoked: string[];
+  saved: Array<{ blob: Blob; fileName: string }>;
   previews: Array<{
     request: PreviewRequest;
     resolve(result: ImageResult): void;
@@ -29,6 +30,7 @@ function makeHarness(): Harness {
   const jobs: Job[] = [];
   const events: JobEvents[] = [];
   const revoked: string[] = [];
+  const saved: Harness['saved'] = [];
   const previews: Harness['previews'] = [];
   const cancel = vi.fn();
   const dispose = vi.fn();
@@ -60,6 +62,7 @@ function makeHarness(): Harness {
     dispose,
     createRunner,
     revoked,
+    saved,
     previews,
     finish: (status) => settle({ jobId: jobs.at(-1)!.id, status, results: [], failures: [] }),
     deps: {
@@ -67,6 +70,7 @@ function makeHarness(): Harness {
       createId: () => `id-${(counter += 1)}`,
       createObjectURL: () => `blob:url-${(urls += 1)}`,
       revokeObjectURL: (url) => revoked.push(url),
+      saveBlob: (blob, fileName) => saved.push({ blob, fileName }),
     },
   };
   return harness;
@@ -250,6 +254,24 @@ describe('Workspace', () => {
       'a-reimage.jpg',
       'b-reimage.jpg',
     ]);
+  });
+
+  it('downloads all finished images as one ZIP', async () => {
+    const { harness, add } = setup();
+    add(image('a.jpg'), image('b.jpg'));
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    expect(screen.queryByRole('button', { name: /ZIP/ })).not.toBeInTheDocument();
+    fireEvent.click(apply());
+    const [first, second] = harness.jobs[0]!.images;
+    act(() => {
+      harness.events[0]!.onResult?.(imageResult(first!.id, 400));
+      harness.events[0]!.onResult?.(imageResult(second!.id, 600));
+      harness.finish('done');
+    });
+    fireEvent.click(await screen.findByRole('button', { name: /ZIP/ }));
+    await waitFor(() => expect(harness.saved).toHaveLength(1));
+    expect(harness.saved[0]!.fileName).toBe('reimage.zip');
+    expect(harness.saved[0]!.blob.type).toBe('application/zip');
   });
 
   it('flags results that missed the target or were made smaller to fit', async () => {

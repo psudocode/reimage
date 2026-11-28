@@ -5,6 +5,7 @@ import { ImageList } from '../workspace/ImageList.tsx';
 import { formatBytes, savedPercent } from '../workspace/files.ts';
 import type { WorkspaceItem } from '../workspace/state.ts';
 import { ActionButton } from './ActionButton.tsx';
+import { ZipButton } from './ZipButton.tsx';
 import { Canvas } from './Canvas.tsx';
 import { Filmstrip } from './Filmstrip.tsx';
 import { ItemNotes } from './ItemNotes.tsx';
@@ -160,6 +161,7 @@ function EditorDesktop({ workspace, onFiles, skipped, selected, model }: LayoutP
             <Stats item={selected} preview={model.preview} />
             <BatchSummary items={items} />
             {running && <RunProgress items={items} />}
+            <ZipButton workspace={workspace} />
             <ActionButton workspace={workspace} />
             <button
               type="button"
@@ -282,6 +284,7 @@ function EditorMobile({ workspace, onFiles, skipped, selected, model }: LayoutPr
           <Icon name="search" className="size-5" />
         </button>
         <UploadButton variant="icon" onFiles={onFiles} disabled={running} />
+        <ZipButton workspace={workspace} compact />
         <ActionButton workspace={workspace} compact />
       </div>
 
