@@ -4,6 +4,7 @@ export const ICON_NAMES = [
   'resize',
   'compress',
   'convert',
+  'strip-metadata',
   'transform',
   'export',
   'upload',

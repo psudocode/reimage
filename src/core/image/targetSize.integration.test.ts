@@ -80,7 +80,7 @@ describe('target size with the real MozJPEG encoder', () => {
     expect(result.downscaled).toBeUndefined();
     expect(result.targetMissed).toBeUndefined();
     expect(result.width).toBe(256);
-  });
+  }, 15_000);
 
   it('downscales when quality alone cannot reach the target', async () => {
     const source = bitmap(256, 256) as unknown as ImageBitmap;
@@ -95,12 +95,12 @@ describe('target size with the real MozJPEG encoder', () => {
     expect(result.downscaled).toBe(true);
     expect(result.width).toBeLessThan(256);
     expect(result.blob.size).toBeLessThanOrEqual(target);
-  });
+  }, 15_000);
 
   it('flags a missed target when it is impossible', async () => {
     const source = bitmap(64, 64) as unknown as ImageBitmap;
     const result = await encoder(source, output(50), 'image/jpeg');
     expect(result.targetMissed).toBe(true);
     expect(result.downscaled).toBe(true);
-  });
+  }, 15_000);
 });

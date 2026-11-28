@@ -115,6 +115,25 @@
         "position": "Position must be between 0 and 100.",
         "edges": "Each edge must be 0 to 99, and opposite edges must leave part of the image."
       }
+    },
+    "stripMetadata": {
+      "label": "Strip metadata",
+      "description": "Remove EXIF, GPS location, camera details, timestamps, and thumbnails to protect your privacy.",
+      "purgedHeading": "Removed for privacy",
+      "items": {
+        "gps": "GPS location coordinates & altitude",
+        "camera": "Camera make, model & shooting settings",
+        "timestamps": "Original capture and modification dates",
+        "thumbnails": "Embedded thumbnail previews",
+        "author": "Author, copyright & software tags"
+      },
+      "quality": "Quality",
+      "qualityHint": "Output quality for JPEG, WebP, and AVIF files.",
+      "losslessNote": "PNG files remain 100% lossless.",
+      "privacyNote": "Runs 100% locally in your browser. Images are never uploaded to any server.",
+      "errors": {
+        "quality": "Quality must be between 1 and 100."
+      }
     }
   },
   "categories": {

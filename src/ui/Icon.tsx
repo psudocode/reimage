@@ -31,6 +31,12 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="M21 17H7l3 3" />
     </>
   ),
+  'strip-metadata': (
+    <>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+      <path d="m9 12 2 2 4-4" />
+    </>
+  ),
   transform: (
     <>
       <rect x="4" y="4" width="12" height="12" rx="1.5" />

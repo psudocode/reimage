@@ -115,6 +115,25 @@
         "position": "Posisi harus antara 0 dan 100.",
         "edges": "Tiap sisi harus 0 sampai 99, dan sisi yang berlawanan harus menyisakan sebagian gambar."
       }
+    },
+    "stripMetadata": {
+      "label": "Hapus metadata",
+      "description": "Hapus EXIF, lokasi GPS, detail kamera, stempel waktu, dan thumbnail untuk melindungi privasi Anda.",
+      "purgedHeading": "Dihapus demi privasi",
+      "items": {
+        "gps": "Koordinat lokasi GPS & ketinggian",
+        "camera": "Merek kamera, model & pengaturan pemotretan",
+        "timestamps": "Tanggal pengambilan asli dan perubahan",
+        "thumbnails": "Pratinjau thumbnail tersemat",
+        "author": "Tanda pembuat, hak cipta & aplikasi"
+      },
+      "quality": "Kualitas",
+      "qualityHint": "Kualitas hasil untuk file JPEG, WebP, dan AVIF.",
+      "losslessNote": "File PNG tetap 100% lossless.",
+      "privacyNote": "Berjalan 100% lokal di browser Anda. Gambar tidak pernah diunggah ke server.",
+      "errors": {
+        "quality": "Kualitas harus antara 1 dan 100."
+      }
     }
   },
   "categories": {

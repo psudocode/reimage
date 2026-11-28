@@ -13,7 +13,9 @@ export interface ToolContext {
 }
 
 /** Output settings a tool may set. The pipeline builder merges them over the defaults. */
-export type OutputOverrides = Partial<Pick<OutputSettings, 'format' | 'quality' | 'targetBytes'>>;
+export type OutputOverrides = Partial<
+  Pick<OutputSettings, 'format' | 'quality' | 'targetBytes' | 'stripMetadata'>
+>;
 
 export interface ToolPanelProps<O> {
   value: O;
