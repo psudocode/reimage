@@ -37,6 +37,12 @@ function makeApi() {
           calls.push({ resolve, reject, pipeline: request.pipeline });
         }),
     ),
+    renderMany: vi.fn(
+      (request) =>
+        new Promise<ImageResult>((resolve, reject) => {
+          calls.push({ resolve, reject, pipeline: request.pipeline });
+        }),
+    ),
     createObjectURL: () => `blob:preview-${(urls += 1)}`,
     revokeObjectURL: (url) => revoked.push(url),
   };

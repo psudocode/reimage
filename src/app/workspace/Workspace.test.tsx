@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { JobEvents, JobHandle, JobOutcome } from '../../core/job/JobRunner.ts';
-import type { PreviewRequest } from '../../core/job/JobRunner.ts';
+import type { PreviewManyRequest, PreviewRequest } from '../../core/job/JobRunner.ts';
 import type { ImageResult, Job } from '../../core/pipeline/types.ts';
 import { LocaleContext, type Locale } from '../../i18n/index.ts';
 import { Workspace } from './Workspace.tsx';
@@ -15,6 +15,11 @@ interface Harness {
   dispose: ReturnType<typeof vi.fn>;
   createRunner: ReturnType<typeof vi.fn>;
   revoked: string[];
+  manyPreviews: Array<{
+    request: PreviewManyRequest;
+    resolve(result: ImageResult): void;
+    reject(error: Error): void;
+  }>;
   previews: Array<{
     request: PreviewRequest;
     resolve(result: ImageResult): void;
@@ -30,6 +35,7 @@ function makeHarness(): Harness {
   const events: JobEvents[] = [];
   const revoked: string[] = [];
   const previews: Harness['previews'] = [];
+  const manyPreviews: Harness['manyPreviews'] = [];
   const cancel = vi.fn();
   const dispose = vi.fn();
   let settle: (outcome: JobOutcome) => void = () => {};
@@ -49,12 +55,18 @@ function makeHarness(): Harness {
         previews.push({ request, resolve, reject });
       });
     },
+    previewMany(request) {
+      return new Promise<ImageResult>((resolve, reject) => {
+        manyPreviews.push({ request, resolve, reject });
+      });
+    },
     dispose,
   };
   const createRunner = vi.fn(() => runner);
 
   const harness: Harness = {
     jobs,
+    manyPreviews,
     events,
     cancel,
     dispose,
@@ -516,6 +528,104 @@ describe('Workspace', () => {
     fireEvent.keyDown(box, { key: 'ArrowRight' });
     expect(screen.getByLabelText('Trim left (%)')).toHaveValue(1);
     expect(screen.getByLabelText('Trim right (%)')).toHaveValue(9);
+  });
+
+  describe('merge & collage', () => {
+    const openMerge = async (add: (...files: File[]) => void, ...files: File[]) => {
+      add(...files);
+      await screen.findByRole('radio', { name: /Fixed quality/ });
+      fireEvent.change(screen.getByRole('searchbox', { name: 'Search tools' }), {
+        target: { value: 'merge' },
+      });
+      fireEvent.click(tool('Merge & collage'));
+      await screen.findByRole('radio', { name: 'Side by side' });
+    };
+
+    it('needs two images before it can apply', async () => {
+      const { add } = setup();
+      await openMerge(add, image('a.jpg'));
+      expect(apply()).toBeDisabled();
+      expect(screen.getByRole('alert')).toHaveTextContent('Add at least two images to merge.');
+      add(image('b.jpg'));
+      await waitFor(() => expect(apply()).toBeEnabled());
+    });
+
+    it('runs one combined job and offers ONE download for the whole list', async () => {
+      const { harness, add } = setup();
+      await openMerge(add, image('a.jpg'), image('b.png', 'image/png'));
+      fireEvent.click(screen.getByRole('radio', { name: 'Stacked' }));
+
+      fireEvent.click(apply());
+
+      const job = harness.jobs[0]!;
+      expect(job.combine).toBe(true);
+      expect(job.images).toHaveLength(2);
+      expect(job.pipeline.steps).toEqual([
+        { toolId: 'merge', options: expect.objectContaining({ layout: 'vertical' }) },
+      ]);
+
+      act(() => {
+        harness.events[0]!.onResult?.(
+          imageResult(job.id, 700, { width: 300, height: 500, bytesBefore: 2000 }),
+        );
+        harness.finish('done');
+      });
+
+      const link = await screen.findByRole('link', { name: /Download/ });
+      expect(link).toHaveAttribute('download', 'merged-reimage.jpg');
+      // Real numbers: both inputs together (2.0 KB) down to the merged file.
+      expect(screen.getByText(/2\.0 KB →/)).toBeInTheDocument();
+      expect(screen.getByText(/300×500/)).toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Merged image' })).toBeInTheDocument();
+      // The list still shows two untouched originals.
+      expect(screen.queryByText(/2 done/)).not.toBeInTheDocument();
+    });
+
+    it('drops the merged image when an image is added, and frees its URL', async () => {
+      const { harness, add } = setup();
+      await openMerge(add, image('a.jpg'), image('b.jpg'));
+      fireEvent.click(apply());
+      const job = harness.jobs[0]!;
+      act(() => {
+        harness.events[0]!.onResult?.(imageResult(job.id, 700));
+        harness.finish('done');
+      });
+      await screen.findByRole('link', { name: /Download/ });
+
+      const before = harness.revoked.length;
+      add(image('c.jpg'));
+      await waitFor(() => expect(apply()).toBeInTheDocument());
+      expect(screen.queryByRole('link', { name: /Download/ })).not.toBeInTheDocument();
+      expect(harness.revoked.length).toBeGreaterThan(before);
+    });
+
+    it('shows a failed merge', async () => {
+      const { harness, add } = setup();
+      await openMerge(add, image('a.jpg'), image('b.jpg'));
+      fireEvent.click(apply());
+      const job = harness.jobs[0]!;
+      act(() => {
+        harness.events[0]!.onFailure?.({ imageId: job.id, error: new Error('out of memory') });
+        harness.finish('failed');
+      });
+      expect(await screen.findByText('Could not merge: out of memory')).toBeInTheDocument();
+      expect(apply()).toBeEnabled();
+    });
+
+    it('previews all the images as one picture', async () => {
+      const { harness, add } = setup();
+      await openMerge(add, image('a.jpg'), image('b.jpg'));
+      await waitFor(() => expect(harness.manyPreviews).toHaveLength(1));
+      expect(harness.manyPreviews[0]!.request.files).toHaveLength(2);
+      expect(harness.manyPreviews[0]!.request.pipeline.steps[0]).toMatchObject({ toolId: 'merge' });
+      await act(async () =>
+        harness.manyPreviews[0]!.resolve(
+          imageResult('p', 500, { width: 100, height: 50, previewScale: 0.5 }),
+        ),
+      );
+      expect(await screen.findByRole('img', { name: 'Merged image' })).toBeInTheDocument();
+      expect(screen.queryByRole('slider', { name: 'Before and after' })).not.toBeInTheDocument();
+    });
   });
 
   it('localises the editor', async () => {

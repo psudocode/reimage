@@ -50,6 +50,14 @@ export interface PreviewRequest {
   maxEdge?: number;
 }
 
+export interface PreviewManyRequest {
+  /** Id the result is reported under. */
+  imageId: string;
+  files: File[];
+  pipeline: Pipeline;
+  maxEdge?: number;
+}
+
 function toError(value: unknown): Error {
   return value instanceof Error ? value : new Error(String(value));
 }
@@ -76,6 +84,19 @@ export class JobRunner {
       (api, ctx) =>
         api.process(
           { imageId, file, pipeline, attempt: ctx.attempt, previewMaxEdge: maxEdge },
+          Comlink.proxy(() => {}),
+        ),
+      { weight: 0, signal },
+    );
+  }
+
+  /** Like `preview`, for a many-to-one tool: every file goes in, one small image comes out. */
+  previewMany(request: PreviewManyRequest, signal?: AbortSignal): Promise<ImageResult> {
+    const { imageId, files, pipeline, maxEdge = PREVIEW_MAX_EDGE } = request;
+    return this.pool.run(
+      (api, ctx) =>
+        api.processMany(
+          { imageId, files, pipeline, attempt: ctx.attempt, previewMaxEdge: maxEdge },
           Comlink.proxy(() => {}),
         ),
       { weight: 0, signal },
@@ -131,8 +152,50 @@ export class JobRunner {
       }
     };
 
+    /** A many-to-one job: one task, one result (reported under the job id). */
+    const runCombined = async () => {
+      const reportAll = (fraction: number) => {
+        for (const image of job.images) reportProgress(image.id, fraction);
+      };
+      try {
+        const result = await this.pool.run(
+          (api, ctx) =>
+            api.processMany(
+              {
+                imageId: job.id,
+                files: job.images.map((image) => image.file),
+                pipeline: job.pipeline,
+                attempt: ctx.attempt,
+              },
+              Comlink.proxy(reportAll),
+            ),
+          {
+            weight: job.images.reduce((sum, image) => sum + image.size, 0),
+            signal: controller.signal,
+          },
+        );
+        reportAll(1);
+        results.push(result);
+        events.onResult?.(result);
+      } catch (cause) {
+        if (cause instanceof PoolAbortError || controller.signal.aborted) return;
+        const failure = { imageId: job.id, error: toError(cause) };
+        failures.push(failure);
+        events.onFailure?.(failure);
+      }
+    };
+
     const promise = (async (): Promise<JobOutcome> => {
       setStatus('running');
+      if (job.combine && job.images.length > 0) {
+        await runCombined();
+        let final: JobOutcome['status'];
+        if (controller.signal.aborted) final = 'cancelled';
+        else if (results.length === 0) final = 'failed';
+        else final = 'done';
+        setStatus(final);
+        return { jobId: job.id, status: final, results, failures };
+      }
       // Submit biggest files first: the pool starts the first task immediately, so
       // ordering has to happen here (technical.md §7: reduces tail latency).
       const ordered = [...job.images].sort((a, b) => b.size - a.size);

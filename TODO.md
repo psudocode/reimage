@@ -24,7 +24,7 @@
 
 - [ ] Rotate & flip with automatic EXIF orientation fix
 - [ ] Expand canvas (padding / background color)
-- [ ] Merge & collage (side by side, stacked, grid)
+- [x] Merge & collage (side by side, stacked, grid)
 - [ ] Watermark (text or logo)
 - [x] Strip metadata (EXIF & GPS)
 - [ ] Pipelines (chain steps + IndexedDB presets via `idb-keyval`)
