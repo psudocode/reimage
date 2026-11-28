@@ -58,6 +58,36 @@ function PreviewProblem({ message }: { message?: string }) {
   );
 }
 
+/** Why a many-to-one tool can't run on this list yet (too few or too many images). */
+function CombineNote({ messageKey }: { messageKey?: string }) {
+  const t = useT();
+  if (!messageKey) return null;
+  return (
+    <p role="alert" className="text-xs text-amber-400">
+      {t(messageKey)}
+    </p>
+  );
+}
+
+function CombinedProblem({ message }: { message?: string }) {
+  const t = useT();
+  if (!message) return null;
+  return (
+    <p role="alert" className="text-xs text-red-400">
+      {t('editor.combinedError').replace('{message}', message)}
+    </p>
+  );
+}
+
+/** What `Stats` needs when the tool merges the whole list into one image. */
+function combinedStats(workspace: Workspace) {
+  if (!workspace.combining) return undefined;
+  return {
+    totalSize: workspace.items.reduce((sum, item) => sum + item.size, 0),
+    result: workspace.combined,
+  };
+}
+
 function BatchSummary({ items }: { items: WorkspaceItem[] }) {
   const t = useT();
   const done = items.filter((item) => item.status === 'done' && item.result);
@@ -157,7 +187,7 @@ function EditorDesktop({ workspace, onFiles, skipped, selected, model }: LayoutP
             <span className="truncate">{t(model.tool.labelKey)}</span>
           </h2>
           <div className="ml-auto flex items-center gap-4 text-sm">
-            <Stats item={selected} preview={model.preview} />
+            <Stats item={selected} preview={model.preview} combined={combinedStats(workspace)} />
             <BatchSummary items={items} />
             {running && <RunProgress items={items} />}
             <ActionButton workspace={workspace} />
@@ -198,11 +228,14 @@ function EditorDesktop({ workspace, onFiles, skipped, selected, model }: LayoutP
                 onOptionsChange={workspace.setOptions}
                 preview={model.preview}
                 locked={running}
+                combined={workspace.combining ? { result: workspace.combined } : undefined}
               />
             </div>
             <div className="mx-auto max-w-3xl space-y-1">
               <ItemNotes item={selected} />
               <PreviewProblem message={model.preview.error} />
+              <CombineNote messageKey={workspace.combineError} />
+              <CombinedProblem message={workspace.combinedError} />
               <SkippedNote count={skipped} />
             </div>
           </div>
@@ -267,7 +300,7 @@ function EditorMobile({ workspace, onFiles, skipped, selected, model }: LayoutPr
     <div className="fixed inset-0 z-40 flex flex-col overflow-hidden bg-slate-950">
       <div className="flex items-center gap-2 border-b border-slate-800 bg-slate-900 px-3 py-2">
         <div className="min-w-0 flex-1 truncate text-xs">
-          <Stats item={selected} preview={model.preview} />
+          <Stats item={selected} preview={model.preview} combined={combinedStats(workspace)} />
         </div>
         <button
           type="button"
@@ -304,12 +337,15 @@ function EditorMobile({ workspace, onFiles, skipped, selected, model }: LayoutPr
             options={workspace.options}
             onOptionsChange={workspace.setOptions}
             preview={model.preview}
+            combined={workspace.combining ? { result: workspace.combined } : undefined}
             locked={running}
           />
         </div>
         <div className="mx-auto max-w-md space-y-1">
           <ItemNotes item={selected} />
           <PreviewProblem message={model.preview.error} />
+          <CombineNote messageKey={workspace.combineError} />
+          <CombinedProblem message={workspace.combinedError} />
           <SkippedNote count={skipped} />
           <BatchSummary items={items} />
         </div>

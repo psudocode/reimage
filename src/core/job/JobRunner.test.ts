@@ -3,14 +3,19 @@ import type { ImageResult, InputImage, Job, Pipeline } from '../pipeline/types.t
 import { WorkerPool, type PoolWorker } from '../workers/pool.ts';
 import { JobRunner, PREVIEW_MAX_EDGE, type ImageWorkerPoolLike } from './JobRunner.ts';
 
+type ManyFn = (
+  request: { imageId: string; files: unknown[]; attempt: number; previewMaxEdge?: number },
+  onProgress: (fraction: number) => void,
+) => Promise<ImageResult>;
+
 type ProcessFn = (
   request: { imageId: string; attempt: number; previewMaxEdge?: number },
   onProgress: (fraction: number) => void,
 ) => Promise<ImageResult>;
 
-function makePool(process: ProcessFn, size = 2) {
-  const createWorker = (): PoolWorker<{ process: ProcessFn }> => ({
-    api: { process },
+function makePool(process: ProcessFn, size = 2, processMany: ManyFn = async () => result('x')) {
+  const createWorker = (): PoolWorker<{ process: ProcessFn; processMany: ManyFn }> => ({
+    api: { process, processMany },
     terminate: () => {},
     onCrash: () => {},
   });
@@ -174,5 +179,75 @@ describe('JobRunner', () => {
       expect.objectContaining({ imageId: 'a', previewMaxEdge: PREVIEW_MAX_EDGE }),
       expect.objectContaining({ imageId: 'b', previewMaxEdge: 300 }),
     ]);
+  });
+
+  describe('combined jobs (many-to-one)', () => {
+    const combined = (images: InputImage[]): Job => ({ ...job(images), combine: true });
+
+    it('sends every file in one task and reports one result under the job id', async () => {
+      const process = vi.fn(async (request: { imageId: string }) => result(request.imageId));
+      const processMany = vi.fn<ManyFn>(async (request, onProgress) => {
+        onProgress(0.5);
+        return result(request.imageId);
+      });
+      const onResult = vi.fn();
+      const onProgress = vi.fn();
+
+      const outcome = await new JobRunner(makePool(process, 2, processMany)).start(
+        combined([image('a'), image('b'), image('c')]),
+        { onResult, onProgress },
+      ).promise;
+
+      expect(process).not.toHaveBeenCalled();
+      expect(processMany).toHaveBeenCalledTimes(1);
+      expect(processMany.mock.calls[0]![0]).toMatchObject({ imageId: 'job-1', attempt: 0 });
+      expect(processMany.mock.calls[0]![0].files).toHaveLength(3);
+      expect(outcome.status).toBe('done');
+      expect(outcome.results.map((r) => r.imageId)).toEqual(['job-1']);
+      expect(onResult).toHaveBeenCalledTimes(1);
+      // Every input moves with the one task.
+      expect(onProgress).toHaveBeenCalledWith('a', 0.5, expect.any(Number));
+      expect(onProgress).toHaveBeenLastCalledWith(expect.any(String), 1, 1);
+    });
+
+    it('fails the job when the one task fails', async () => {
+      const onFailure = vi.fn();
+      const pool = makePool(
+        async (request) => result(request.imageId),
+        2,
+        async () => {
+          throw new Error('boom');
+        },
+      );
+      const outcome = await new JobRunner(pool).start(combined([image('a'), image('b')]), {
+        onFailure,
+      }).promise;
+      expect(outcome.status).toBe('failed');
+      expect(onFailure).toHaveBeenCalledWith({ imageId: 'job-1', error: expect.any(Error) });
+    });
+
+    it('cancels', async () => {
+      const pool = makePool(
+        async (request) => result(request.imageId),
+        1,
+        () => new Promise<ImageResult>(() => {}),
+      );
+      const handle = new JobRunner(pool).start(combined([image('a'), image('b')]));
+      handle.cancel();
+      expect((await handle.promise).status).toBe('cancelled');
+    });
+
+    it('previews many files as one small image', async () => {
+      const processMany = vi.fn<ManyFn>(async (request) => result(request.imageId));
+      const preview = await new JobRunner(
+        makePool(async () => result('x'), 2, processMany),
+      ).previewMany({
+        imageId: 'p',
+        files: [{} as File, {} as File],
+        pipeline,
+      });
+      expect(preview.imageId).toBe('p');
+      expect(processMany.mock.calls[0]![0]).toMatchObject({ previewMaxEdge: PREVIEW_MAX_EDGE });
+    });
   });
 });

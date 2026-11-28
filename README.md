@@ -27,6 +27,7 @@ reimage is a free, open-source image toolkit. It lets you compress, convert, res
 - **Convert:** Convert between JPG, PNG, WebP and AVIF. HEIC input works where the browser supports it.
 - **Resize:** Resize by pixels, percentage or preset (social media, passport photo, marketplace).
 - **Crop:** Free crop (trim each edge by percent) or a fixed ratio (1:1, 4:3, 3:2, 16:9, portrait variants, custom), with a position control. Percent-based, so it works the same across a batch.
+- **Merge & collage:** Join all your images into one: side by side, stacked or in a grid, with a gap and a background colour (or transparent, saved as PNG). Pictures are never enlarged, and an oversized result is shrunk to fit your device's memory.
 - **Batch + ZIP:** Run any tool on many images and download everything as one ZIP.
 - **Offline:** Install reimage as an app (PWA). It keeps working without internet.
 
@@ -34,7 +35,6 @@ reimage is a free, open-source image toolkit. It lets you compress, convert, res
 
 - Rotate and flip, with automatic EXIF orientation fix
 - Expand canvas (padding or background colour)
-- Merge and collage (side by side, stacked, grid)
 - Watermark (text or logo)
 - Strip metadata (EXIF and GPS location)
 - **Pipelines:** Chain steps (crop → resize → compress → convert) and save them as presets

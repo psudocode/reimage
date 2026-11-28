@@ -116,6 +116,28 @@
         "edges": "Each edge must be 0 to 99, and opposite edges must leave part of the image."
       }
     },
+    "merge": {
+      "label": "Merge & collage",
+      "description": "Join all your images into one: side by side, stacked, or in a grid. Pictures are never enlarged.",
+      "layout": "Layout",
+      "layoutHorizontal": "Side by side",
+      "layoutVertical": "Stacked",
+      "layoutGrid": "Grid",
+      "columns": "Columns",
+      "gap": "Gap (px)",
+      "background": "Background",
+      "transparent": "Transparent background",
+      "transparentHint": "Saved as PNG so the transparency is kept.",
+      "sizeHint": "Pictures keep their order in the list. If the result would be too big for your device, everything is shrunk to fit.",
+      "errors": {
+        "layout": "Choose a layout.",
+        "columns": "Columns must be a whole number from 2 to 8.",
+        "gap": "Gap must be a whole number from 0 to 200.",
+        "background": "Pick a colour, or use a transparent background.",
+        "needTwo": "Add at least two images to merge.",
+        "tooMany": "Merge at most 50 images at once."
+      }
+    },
     "stripMetadata": {
       "label": "Strip metadata",
       "description": "Remove the hidden data inside a photo before you share it. The picture itself looks the same.",
@@ -174,6 +196,8 @@
       "sw": "bottom left",
       "w": "left"
     },
-    "saving": "Working…"
+    "saving": "Working…",
+    "combinedAlt": "Merged image",
+    "combinedError": "Could not merge: {message}"
   }
 }

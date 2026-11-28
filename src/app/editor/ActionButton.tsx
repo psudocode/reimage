@@ -18,7 +18,7 @@ export function ActionButton({
   compact?: boolean;
 }) {
   const t = useT();
-  const { running, selected, items, errors } = workspace;
+  const { running, selected, items, errors, combining, combined } = workspace;
   const label = compact ? 'sr-only' : '';
 
   if (running) {
@@ -32,12 +32,14 @@ export function ActionButton({
       </button>
     );
   }
-  if (selected?.status === 'done' && selected.result) {
+  // A many-to-one tool has one result for the whole list; the others one per image.
+  const finished = combining ? combined : selected?.status === 'done' ? selected.result : undefined;
+  if (finished) {
     return (
-      <a href={selected.result.url} download={selected.result.fileName} className={PRIMARY}>
+      <a href={finished.url} download={finished.fileName} className={PRIMARY}>
         <Icon name="download" className="size-4" />
         <span className={label}>{t('editor.download')}</span>
-        <span className="sr-only"> {selected.result.fileName}</span>
+        <span className="sr-only"> {finished.fileName}</span>
       </a>
     );
   }

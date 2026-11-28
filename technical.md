@@ -244,7 +244,7 @@ export interface ToolContext {
 - A tool is two objects with the same `id`: a `ToolRuntime` (registered in `runtimeRegistry.ts`, loaded by the worker) and a `ToolUI` (registered in `uiRegistry.ts`, loaded by the app). Options types, defaults and `validate` live in a shared React-free `options.ts`. ESLint forbids React and UI imports on the worker side, and `size-limit` caps the worker bundle. See [ADR 002](docs/adr/002-split-tool-runtime-and-ui.md).
 - The editor builds its category rail and tool grid from `uiRegistry.ts` (see [Editor UI](#editor-ui-and-live-preview)): a new tool appears there by registering, with no layout code to touch.
 - Output encoding is **not** a tool step. It happens once at the end of the pipeline (see [Codecs](#8-codecs)).
-- Multi-input tools (merge/collage) implement `runMany(inputs: ImageBitmap[], …)` on the `ToolRuntime` and are flagged `kind: 'many-to-one'`.
+- Multi-input tools (merge/collage) implement `runMany(inputs: ImageBitmap[], …)` on the `ToolRuntime` and are flagged `kind: 'many-to-one'`. A many-to-one job is ONE task and ONE result: `Job.combine` makes `JobRunner` send every file to `processMany` in the worker (`core/workers/processMany.ts`) instead of one task per image. It applies the same guards (each input under the pixel cap, all decoded inputs together under 4× the cap) and the result is reported under the job id. The workspace keeps it in `WorkspaceState.combined`, separate from the per-image results, and drops it whenever the list or the options change. The live preview uses `JobRunner.previewMany` and the canvas shows the merged picture instead of the before/after slider.
 
 ---
 

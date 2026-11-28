@@ -116,6 +116,28 @@
         "edges": "Tiap sisi harus 0 sampai 99, dan sisi yang berlawanan harus menyisakan sebagian gambar."
       }
     },
+    "merge": {
+      "label": "Gabung & kolase",
+      "description": "Gabungkan semua gambar jadi satu: berdampingan, bertumpuk, atau grid. Gambar tidak pernah diperbesar.",
+      "layout": "Tata letak",
+      "layoutHorizontal": "Berdampingan",
+      "layoutVertical": "Bertumpuk",
+      "layoutGrid": "Grid",
+      "columns": "Kolom",
+      "gap": "Jarak (px)",
+      "background": "Latar belakang",
+      "transparent": "Latar transparan",
+      "transparentHint": "Disimpan sebagai PNG supaya transparansinya tetap ada.",
+      "sizeHint": "Urutan gambar mengikuti daftar. Kalau hasilnya terlalu besar untuk perangkatmu, semuanya diperkecil agar muat.",
+      "errors": {
+        "layout": "Pilih tata letak.",
+        "columns": "Kolom harus bilangan bulat dari 2 sampai 8.",
+        "gap": "Jarak harus bilangan bulat dari 0 sampai 200.",
+        "background": "Pilih warna, atau pakai latar transparan.",
+        "needTwo": "Tambahkan minimal dua gambar untuk digabung.",
+        "tooMany": "Gabungkan maksimal 50 gambar sekaligus."
+      }
+    },
     "stripMetadata": {
       "label": "Hapus metadata",
       "description": "Buang data tersembunyi di dalam foto sebelum dibagikan. Gambarnya sendiri tetap terlihat sama.",
@@ -174,6 +196,8 @@
       "sw": "kiri bawah",
       "w": "kiri"
     },
-    "saving": "Memproses…"
+    "saving": "Memproses…",
+    "combinedAlt": "Gambar gabungan",
+    "combinedError": "Gagal menggabungkan: {message}"
   }
 }

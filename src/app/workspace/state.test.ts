@@ -3,6 +3,7 @@ import {
   initialWorkspaceState,
   workspaceReducer,
   type ItemResult,
+  type WorkspaceAction,
   type WorkspaceItem,
   type WorkspaceState,
 } from './state.ts';
@@ -98,5 +99,45 @@ describe('workspaceReducer', () => {
     expect(state.items.map((i) => i.status)).toEqual(['ready', 'ready', 'ready']);
     expect(state.items[0]).toMatchObject({ progress: 0, result: undefined });
     expect(state.items[1]!.error).toBeUndefined();
+  });
+
+  describe('combined result', () => {
+    const withCombined: WorkspaceState = {
+      running: false,
+      items: [item('a'), item('b')],
+      combined: result,
+    };
+
+    it('keeps the result when the run ends', () => {
+      const running = workspaceReducer(withCombined, { type: 'begin' });
+      expect(running.combined).toBeUndefined();
+      const done = workspaceReducer(workspaceReducer(running, { type: 'combined', result }), {
+        type: 'end',
+      });
+      expect(done.combined).toBe(result);
+      expect(done.running).toBe(false);
+      expect(done.items.every((entry) => entry.status === 'ready')).toBe(true);
+    });
+
+    it('records a failure and clears it on the next run', () => {
+      const failed = workspaceReducer(
+        { ...withCombined, combined: undefined },
+        { type: 'combinedFailure', message: 'boom' },
+      );
+      expect(failed.combinedError).toBe('boom');
+      expect(workspaceReducer(failed, { type: 'begin' }).combinedError).toBeUndefined();
+    });
+
+    it('is dropped when the list or the options change', () => {
+      const actions: WorkspaceAction[] = [
+        { type: 'add', items: [item('c')] },
+        { type: 'remove', id: 'a' },
+        { type: 'clear' },
+        { type: 'invalidate' },
+      ];
+      for (const action of actions) {
+        expect(workspaceReducer(withCombined, action).combined).toBeUndefined();
+      }
+    });
   });
 });

@@ -1,7 +1,7 @@
 import { Suspense, useState } from 'react';
 import { useT } from '../../i18n/index.ts';
 import type { ToolUI } from '../../tools/types.ts';
-import type { WorkspaceItem } from '../workspace/state.ts';
+import type { ItemResult, WorkspaceItem } from '../workspace/state.ts';
 import { Compare } from './Compare.tsx';
 import type { PreviewState } from './usePreview.ts';
 
@@ -13,6 +13,8 @@ interface CanvasProps {
   onOptionsChange(options: unknown): void;
   preview: PreviewState;
   locked: boolean;
+  /** The tool merges every image into one: show that one image instead of before/after. */
+  combined?: { result?: ItemResult };
 }
 
 /**
@@ -20,10 +22,42 @@ interface CanvasProps {
  * with its interactive layer on top; every other tool shows the before/after slider.
  * Mount it with `key={item.id}` so the measured image size resets per image.
  */
-export function Canvas({ item, tool, options, onOptionsChange, preview, locked }: CanvasProps) {
+export function Canvas({
+  item,
+  tool,
+  options,
+  onOptionsChange,
+  preview,
+  locked,
+  combined,
+}: CanvasProps) {
   const t = useT();
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const Overlay = tool.Overlay;
+
+  if (combined) {
+    const url = combined.result?.url ?? preview.url;
+    return (
+      <div>
+        {url ? (
+          <img
+            src={url}
+            alt={t('editor.combinedAlt')}
+            draggable={false}
+            className={`block h-auto w-full rounded-lg ${
+              preview.status === 'loading' && !combined.result ? 'opacity-60' : ''
+            }`}
+          />
+        ) : (
+          preview.status !== 'error' && (
+            <p role="status" className="py-12 text-center text-xs text-slate-400">
+              {t('editor.previewLoading')}
+            </p>
+          )
+        )}
+      </div>
+    );
+  }
 
   if (Overlay) {
     return (

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { PreviewRequest } from '../../core/job/JobRunner.ts';
+import type { PreviewManyRequest, PreviewRequest } from '../../core/job/JobRunner.ts';
 import type { ImageResult } from '../../core/pipeline/types.ts';
 import type { WorkspaceItem } from '../workspace/state.ts';
 import { buildPipeline } from '../workspace/pipeline.ts';
@@ -9,6 +9,8 @@ export const PREVIEW_DEBOUNCE_MS = 250;
 
 export interface PreviewApi {
   render(request: PreviewRequest): Promise<ImageResult>;
+  /** For a many-to-one tool: all the images in, one small result out. */
+  renderMany(request: PreviewManyRequest): Promise<ImageResult>;
   createObjectURL(blob: Blob): string;
   revokeObjectURL(url: string): void;
 }
@@ -25,6 +27,10 @@ export interface PreviewState {
 interface PreviewInput {
   api: PreviewApi;
   item: WorkspaceItem | undefined;
+  /** Needed (in list order) when `combining`: the preview is built from all of them. */
+  items?: readonly WorkspaceItem[];
+  /** The tool turns every item into one image (merge, collage). */
+  combining?: boolean;
   toolId: string;
   options: unknown;
   /** Invalid options or a running job: leave the preview alone. */
@@ -34,14 +40,20 @@ interface PreviewInput {
 
 const IDLE: PreviewState = { status: 'idle' };
 
+/** Id the preview of a combined image is reported under. */
+const COMBINED_PREVIEW_ID = 'combined-preview';
+
 /**
- * Live preview for the selected image: after the options settle for
+ * Live preview for the selected image (or, for a many-to-one tool, for the
+ * combined image of the whole list): after the options settle for
  * `debounceMs`, run the tool in a worker on a downscaled copy and expose the
  * result. Out-of-order answers are dropped, and object URLs are always freed.
  */
 export function usePreview({
   api,
   item,
+  items = [],
+  combining = false,
   toolId,
   options,
   enabled,
@@ -50,8 +62,10 @@ export function usePreview({
   const [state, setState] = useState<PreviewState>(IDLE);
   const urlRef = useRef<string | undefined>(undefined);
   const apiRef = useRef(api);
-  const itemId = item?.id;
-  const file = item?.file;
+  // A combined preview depends on the whole list, so its identity is every id in order.
+  const itemId = combining ? items.map((entry) => entry.id).join('|') || undefined : item?.id;
+  // Selecting another item must not restart a combined preview, so it keys on the first file.
+  const file = combining ? items[0]?.file : item?.file;
 
   useEffect(() => {
     apiRef.current = api;
@@ -72,16 +86,16 @@ export function usePreview({
 
   useEffect(() => {
     if (!enabled || !itemId || !file) return;
+    const files = combining ? items.map((entry) => entry.file) : [];
     let current = true;
     setState((previous) => ({ ...previous, status: 'loading', error: undefined }));
     const timer = setTimeout(() => {
       void (async () => {
         try {
-          const result = await apiRef.current.render({
-            imageId: itemId,
-            file,
-            pipeline: buildPipeline(toolId, options),
-          });
+          const pipeline = buildPipeline(toolId, options);
+          const result = combining
+            ? await apiRef.current.renderMany({ imageId: COMBINED_PREVIEW_ID, files, pipeline })
+            : await apiRef.current.render({ imageId: itemId, file, pipeline });
           if (!current) return;
           const url = apiRef.current.createObjectURL(result.blob);
           replaceUrl(url);
@@ -100,7 +114,9 @@ export function usePreview({
       current = false;
       clearTimeout(timer);
     };
-  }, [enabled, itemId, file, toolId, options, debounceMs]);
+    // `items` is read through `itemId`, which changes whenever the list does.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, itemId, file, combining, toolId, options, debounceMs]);
 
   return state;
 }

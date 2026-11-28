@@ -13,7 +13,7 @@ export type Workspace = ReturnType<typeof useWorkspace>;
  */
 export function useEditorModel(workspace: Workspace) {
   const t = useT();
-  const { toolId, options, errors, running, selected } = workspace;
+  const { toolId, options, errors, running, selected, items, combining } = workspace;
   const groups = useMemo(() => groupToolsByCategory(getRegisteredUIs()), []);
   const tool = getToolUIById(toolId)!;
   const [browsedCategory, setBrowsedCategory] = useState(tool.category);
@@ -27,6 +27,8 @@ export function useEditorModel(workspace: Workspace) {
   const preview = usePreview({
     api: workspace.previewApi,
     item: selected,
+    items,
+    combining,
     toolId,
     options,
     enabled: !running && errors.length === 0,

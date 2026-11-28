@@ -11,13 +11,15 @@ import {
   JobRunner,
   type JobEvents,
   type JobHandle,
+  type PreviewManyRequest,
   type PreviewRequest,
 } from '../../core/job/JobRunner.ts';
 import type { ImageResult, InputImage, Job } from '../../core/pipeline/types.ts';
 import { createImagePool } from '../../core/workers/imagePool.ts';
+import { MAX_MERGE_IMAGES, MIN_MERGE_IMAGES } from '../../tools/merge/options.ts';
 import { getRegisteredRuntimes, getToolRuntimeById } from '../../tools/runtimeRegistry.ts';
 import { extensionForMime, outputFileName, splitAcceptedFiles, uniqueFileName } from './files.ts';
-import { buildPipeline } from './pipeline.ts';
+import { buildPipeline, COMBINED_NAME } from './pipeline.ts';
 import {
   initialWorkspaceState,
   workspaceReducer,
@@ -30,6 +32,8 @@ export interface WorkspaceRunner {
   start(job: Job, events: JobEvents): JobHandle;
   /** One image through a pipeline on a downscaled copy (live preview). */
   preview(request: PreviewRequest): Promise<ImageResult>;
+  /** Every image through a many-to-one tool, into one downscaled result. */
+  previewMany(request: PreviewManyRequest): Promise<ImageResult>;
   dispose(): void;
 }
 
@@ -48,6 +52,7 @@ export const browserWorkspaceDeps: WorkspaceDeps = {
     return {
       start: (job, events) => runner.start(job, events),
       preview: (request) => runner.preview(request),
+      previewMany: (request) => runner.previewMany(request),
       dispose: () => pool.destroy(),
     };
   },
@@ -84,11 +89,11 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
 
   /** Results were made with the old settings: free them so nothing stale can be downloaded. */
   const invalidateResults = useCallback(() => {
-    const { items, running } = stateRef.current;
-    if (running || !items.some((item) => item.status === 'done' || item.status === 'failed')) {
-      return;
-    }
+    const { items, running, combined, combinedError } = stateRef.current;
+    const finished = items.some((item) => item.status === 'done' || item.status === 'failed');
+    if (running || !(finished || combined || combinedError)) return;
     for (const item of items) if (item.result) depsRef.current.revokeObjectURL(item.result.url);
+    if (combined) depsRef.current.revokeObjectURL(combined.url);
     dispatch({ type: 'invalidate' });
   }, []);
 
@@ -116,44 +121,73 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
   const previewApi = useMemo(
     () => ({
       render: (request: PreviewRequest) => ensureRunner().preview(request),
+      renderMany: (request: PreviewManyRequest) => ensureRunner().previewMany(request),
       createObjectURL: (blob: Blob) => depsRef.current.createObjectURL(blob),
       revokeObjectURL: (url: string) => depsRef.current.revokeObjectURL(url),
     }),
     [ensureRunner],
   );
 
-  const errors = useMemo(
-    () => getToolRuntimeById(toolId)?.validate(options) ?? [],
-    [toolId, options],
+  /** A many-to-one tool (merge) turns the whole list into one image. */
+  const combining = getToolRuntimeById(toolId)?.kind === 'many-to-one';
+  const itemCount = state.items.length;
+  /** i18n key when the list itself (not the options) rules a many-to-one tool out. */
+  const combineError = combining
+    ? itemCount < MIN_MERGE_IMAGES
+      ? 'tools.merge.errors.needTwo'
+      : itemCount > MAX_MERGE_IMAGES
+        ? 'tools.merge.errors.tooMany'
+        : undefined
+    : undefined;
+  const errors = useMemo(() => {
+    const found = getToolRuntimeById(toolId)?.validate(options) ?? [];
+    return combineError ? [...found, combineError] : found;
+  }, [toolId, options, combineError]);
+
+  /** The merged image belongs to the whole list: free it before the list changes. */
+  const revokeCombined = useCallback(() => {
+    const { combined } = stateRef.current;
+    if (combined) depsRef.current.revokeObjectURL(combined.url);
+  }, []);
+
+  const addFiles = useCallback(
+    (files: Iterable<File>) => {
+      const { accepted, rejected } = splitAcceptedFiles(files);
+      const d = depsRef.current;
+      const items: WorkspaceItem[] = accepted.map((file) => ({
+        id: d.createId(),
+        file,
+        name: file.name,
+        size: file.size,
+        previewUrl: d.createObjectURL(file),
+        status: 'ready',
+        progress: 0,
+      }));
+      if (items.length > 0) {
+        revokeCombined();
+        dispatch({ type: 'add', items });
+      }
+      return { added: items.length, rejected: rejected.length };
+    },
+    [revokeCombined],
   );
 
-  const addFiles = useCallback((files: Iterable<File>) => {
-    const { accepted, rejected } = splitAcceptedFiles(files);
-    const d = depsRef.current;
-    const items: WorkspaceItem[] = accepted.map((file) => ({
-      id: d.createId(),
-      file,
-      name: file.name,
-      size: file.size,
-      previewUrl: d.createObjectURL(file),
-      status: 'ready',
-      progress: 0,
-    }));
-    if (items.length > 0) dispatch({ type: 'add', items });
-    return { added: items.length, rejected: rejected.length };
-  }, []);
-
-  const removeItem = useCallback((id: string) => {
-    const item = stateRef.current.items.find((candidate) => candidate.id === id);
-    if (!item) return;
-    revokeItem(item, depsRef.current);
-    dispatch({ type: 'remove', id });
-  }, []);
+  const removeItem = useCallback(
+    (id: string) => {
+      const item = stateRef.current.items.find((candidate) => candidate.id === id);
+      if (!item) return;
+      revokeCombined();
+      revokeItem(item, depsRef.current);
+      dispatch({ type: 'remove', id });
+    },
+    [revokeCombined],
+  );
 
   const clear = useCallback(() => {
+    revokeCombined();
     for (const item of stateRef.current.items) revokeItem(item, depsRef.current);
     dispatch({ type: 'clear' });
-  }, []);
+  }, [revokeCombined]);
 
   const run = useCallback(async () => {
     const { items, running } = stateRef.current;
@@ -162,6 +196,7 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
 
     // Re-running replaces earlier results: free their blobs now.
     for (const item of items) if (item.result) d.revokeObjectURL(item.result.url);
+    revokeCombined();
 
     const pipeline = buildPipeline(toolId, options);
     const images: InputImage[] = items.map((item) => ({
@@ -170,7 +205,13 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
       name: item.name,
       size: item.size,
     }));
-    const job: Job = { id: d.createId(), images, pipeline, status: 'queued' };
+    const job: Job = {
+      id: d.createId(),
+      images,
+      pipeline,
+      status: 'queued',
+      ...(combining ? { combine: true } : {}),
+    };
     const usedNames = new Set<string>();
     const names = new Map(items.map((item) => [item.id, item.name]));
 
@@ -181,11 +222,27 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
       },
       onResult: (result) => {
         if (handleRef.current !== handle) return;
+        const extension = extensionForMime(result.blob.type);
+        if (combining) {
+          dispatch({
+            type: 'combined',
+            result: {
+              url: d.createObjectURL(result.blob),
+              fileName: outputFileName(COMBINED_NAME, pipeline.output.fileNamePattern, extension),
+              width: result.width,
+              height: result.height,
+              bytesAfter: result.bytesAfter,
+              downscaled: result.downscaled === true,
+              targetMissed: result.targetMissed === true,
+            },
+          });
+          return;
+        }
         const fileName = uniqueFileName(
           outputFileName(
             names.get(result.imageId) ?? 'image',
             pipeline.output.fileNamePattern,
-            extensionForMime(result.blob.type),
+            extension,
           ),
           usedNames,
         );
@@ -204,9 +261,9 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
         });
       },
       onFailure: ({ imageId, error }) => {
-        if (handleRef.current === handle) {
-          dispatch({ type: 'failure', id: imageId, message: error.message });
-        }
+        if (handleRef.current !== handle) return;
+        if (combining) dispatch({ type: 'combinedFailure', message: error.message });
+        else dispatch({ type: 'failure', id: imageId, message: error.message });
       },
     });
     handleRef.current = handle;
@@ -215,7 +272,7 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
       handleRef.current = null;
       dispatch({ type: 'end' });
     }
-  }, [toolId, options, errors, ensureRunner]);
+  }, [toolId, options, errors, combining, ensureRunner, revokeCombined]);
 
   const cancel = useCallback(() => handleRef.current?.cancel(), []);
 
@@ -227,6 +284,9 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
       runnerRef.current?.dispose();
       runnerRef.current = null;
       for (const item of stateRef.current.items) revokeItem(item, depsRef.current);
+      if (stateRef.current.combined) {
+        depsRef.current.revokeObjectURL(stateRef.current.combined.url);
+      }
     },
     [],
   );
@@ -239,6 +299,8 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
     select: setSelectedId,
     previewApi,
     toolId,
+    combining,
+    combineError,
     setToolId,
     options,
     setOptions,

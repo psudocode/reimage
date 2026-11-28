@@ -1,6 +1,9 @@
 import type { Pipeline } from '../../core/pipeline/types.ts';
 import { getToolRuntimeById } from '../../tools/runtimeRegistry.ts';
 
+/** Base name of the file a many-to-one tool (merge) produces. */
+export const COMBINED_NAME = 'merged';
+
 export const FILE_NAME_PATTERN = '{name}-reimage.{ext}';
 
 /**

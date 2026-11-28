@@ -35,6 +35,11 @@ export interface Job {
   images: InputImage[];
   pipeline: Pipeline;
   status: JobStatus;
+  /**
+   * True for a many-to-one tool (merge, collage): all images go into ONE task and
+   * produce ONE result, reported under the job's own id.
+   */
+  combine?: boolean;
 }
 
 export interface ImageResult {

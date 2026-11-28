@@ -28,6 +28,12 @@ export interface WorkspaceItem {
 export interface WorkspaceState {
   items: WorkspaceItem[];
   running: boolean;
+  /**
+   * The one image a many-to-one tool (merge, collage) made from every item. It
+   * belongs to the whole list, so adding or removing an item drops it.
+   */
+  combined?: ItemResult;
+  combinedError?: string;
 }
 
 export const initialWorkspaceState: WorkspaceState = { items: [], running: false };
@@ -40,8 +46,14 @@ export type WorkspaceAction =
   | { type: 'progress'; id: string; fraction: number }
   | { type: 'result'; id: string; result: ItemResult }
   | { type: 'failure'; id: string; message: string }
+  | { type: 'combined'; result: ItemResult }
+  | { type: 'combinedFailure'; message: string }
   | { type: 'invalidate' }
   | { type: 'end' };
+
+function withoutCombined(state: WorkspaceState): WorkspaceState {
+  return { items: state.items, running: state.running };
+}
 
 function update(
   state: WorkspaceState,
@@ -54,11 +66,14 @@ function update(
 export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction): WorkspaceState {
   switch (action.type) {
     case 'add':
-      return { ...state, items: [...state.items, ...action.items] };
+      return { ...withoutCombined(state), items: [...state.items, ...action.items] };
     case 'remove':
-      return { ...state, items: state.items.filter((item) => item.id !== action.id) };
+      return {
+        ...withoutCombined(state),
+        items: state.items.filter((item) => item.id !== action.id),
+      };
     case 'clear':
-      return { ...state, items: [] };
+      return { ...withoutCombined(state), items: [] };
     case 'begin':
       return {
         running: true,
@@ -88,10 +103,14 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
         status: 'failed',
         error: action.message,
       }));
+    case 'combined':
+      return { ...state, combined: action.result, combinedError: undefined };
+    case 'combinedFailure':
+      return { ...state, combinedError: action.message };
     case 'invalidate':
       // Options changed: finished or failed items no longer match what is on screen.
       return {
-        ...state,
+        ...withoutCombined(state),
         items: state.items.map((item) =>
           item.status === 'done' || item.status === 'failed'
             ? { ...item, status: 'ready', progress: 0, result: undefined, error: undefined }
@@ -101,6 +120,7 @@ export function workspaceReducer(state: WorkspaceState, action: WorkspaceAction)
     case 'end':
       // Anything still processing was cancelled: put it back so it can be re-run.
       return {
+        ...state,
         running: false,
         items: state.items.map((item) =>
           item.status === 'processing' ? { ...item, status: 'ready', progress: 0 } : item,
