@@ -2,6 +2,7 @@ import type { Env } from '../core/pipeline/types.ts';
 import { compressRuntime } from './compress/runtime.ts';
 import { convertRuntime } from './convert/runtime.ts';
 import { cropRuntime } from './crop/runtime.ts';
+import { rotateRuntime } from './rotate/runtime.ts';
 import { resizeRuntime } from './resize/runtime.ts';
 import type { ToolRuntime } from './types.ts';
 
@@ -14,6 +15,7 @@ const registeredRuntimes: ToolRuntime<any>[] = [
   convertRuntime,
   resizeRuntime,
   cropRuntime,
+  rotateRuntime,
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -22,7 +22,7 @@
 
 ## Phase 2: v1
 
-- [ ] Rotate & flip with automatic EXIF orientation fix
+- [x] Rotate & flip with automatic EXIF orientation fix
 - [ ] Expand canvas (padding / background color)
 - [ ] Merge & collage (side by side, stacked, grid)
 - [ ] Watermark (text or logo)

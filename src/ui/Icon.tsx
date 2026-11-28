@@ -17,6 +17,12 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="m3 21 7-7" />
     </>
   ),
+  rotate: (
+    <>
+      <path d="M21 12a9 9 0 1 1-3-6.7" />
+      <path d="M21 4v5h-5" />
+    </>
+  ),
   compress: (
     <>
       <path d="m4 14 6 0 0 6" />

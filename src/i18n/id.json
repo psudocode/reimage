@@ -115,6 +115,25 @@
         "position": "Posisi harus antara 0 dan 100.",
         "edges": "Tiap sisi harus 0 sampai 99, dan sisi yang berlawanan harus menyisakan sebagian gambar."
       }
+    },
+    "rotate": {
+      "label": "Putar & balik",
+      "description": "Putar gambar per 90° dan cerminkan. Tidak ada resampling, jadi kualitas tetap utuh.",
+      "rotation": "Putar searah jarum jam",
+      "rotationHint": "Diterapkan setelah pembalikan.",
+      "turns": {
+        "0": "Tanpa putaran",
+        "90": "Putar 90 derajat",
+        "180": "Putar 180 derajat",
+        "270": "Putar 270 derajat"
+      },
+      "flip": "Balik",
+      "flipH": "Balik horizontal",
+      "flipV": "Balik vertikal",
+      "exifHint": "Foto dengan orientasi EXIF diluruskan otomatis saat dimuat, jadi Anda mulai dari gambar yang tegak.",
+      "errors": {
+        "rotation": "Pilih 0, 90, 180 atau 270 derajat."
+      }
     }
   },
   "categories": {
