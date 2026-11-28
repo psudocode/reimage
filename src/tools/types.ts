@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 import type { Env, OutputSettings } from '../core/pipeline/types.ts';
+import type { Size } from '../core/image/resample.ts';
 import type { IconName } from '../ui/iconNames.ts';
 import type { ToolCategoryId } from './categories.ts';
 
@@ -21,7 +22,8 @@ export interface ToolPanelProps<O> {
 
 /** The size of the image being shown, so an overlay can map percent to pixels. */
 export interface ToolOverlayProps<O> extends ToolPanelProps<O> {
-  imageSize: { width: number; height: number };
+  imageSize: Size;
+  /** True while a job runs: the overlay must not change the options. */
   disabled?: boolean;
 }
 

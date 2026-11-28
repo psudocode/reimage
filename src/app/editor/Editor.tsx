@@ -81,13 +81,30 @@ function RunProgress({ items }: { items: WorkspaceItem[] }) {
   );
 }
 
-function ToolOptions({ workspace, model }: { workspace: Workspace; model: EditorModel }) {
+/** The active tool's name and its options panel; the same on desktop and mobile. */
+function ToolSection({
+  workspace,
+  model,
+  panelClassName,
+}: {
+  workspace: Workspace;
+  model: EditorModel;
+  panelClassName?: string;
+}) {
   const t = useT();
   const { Panel } = model.tool;
   return (
-    <Suspense fallback={<p className="text-sm text-slate-400">{t('workspace.loading')}</p>}>
-      <Panel key={workspace.toolId} value={workspace.options} onChange={workspace.setOptions} />
-    </Suspense>
+    <>
+      <h2 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-violet-300">
+        <Icon name={model.tool.icon} className="size-4" />
+        {t(model.tool.labelKey)}
+      </h2>
+      <div className={panelClassName}>
+        <Suspense fallback={<p className="text-sm text-slate-400">{t('workspace.loading')}</p>}>
+          <Panel key={workspace.toolId} value={workspace.options} onChange={workspace.setOptions} />
+        </Suspense>
+      </div>
+    </>
   );
 }
 
@@ -136,13 +153,7 @@ function EditorDesktop({ workspace, onFiles, skipped, selected, model }: LayoutP
           className="flex items-start gap-4 border-b border-slate-800 bg-slate-900 px-4 py-2"
         >
           <div className="max-h-[40vh] min-w-0 flex-1 overflow-y-auto">
-            <h2 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-violet-300">
-              <Icon name={model.tool.icon} className="size-4" />
-              {t(model.tool.labelKey)}
-            </h2>
-            <div className="max-w-md">
-              <ToolOptions workspace={workspace} model={model} />
-            </div>
+            <ToolSection workspace={workspace} model={model} panelClassName="max-w-md" />
           </div>
           <div className="flex shrink-0 flex-col items-end gap-2 text-sm">
             <Stats item={selected} preview={model.preview} />
@@ -308,11 +319,7 @@ function EditorMobile({ workspace, onFiles, skipped, selected, model }: LayoutPr
       </div>
 
       <div className="max-h-40 overflow-y-auto border-t border-slate-800 bg-slate-900 px-4 py-3">
-        <h2 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-violet-300">
-          <Icon name={model.tool.icon} className="size-4" />
-          {t(model.tool.labelKey)}
-        </h2>
-        <ToolOptions workspace={workspace} model={model} />
+        <ToolSection workspace={workspace} model={model} />
       </div>
 
       {searching && (

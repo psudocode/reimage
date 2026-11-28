@@ -43,13 +43,21 @@ export function Compare({ before, after, busy = false }: CompareProps) {
         busy ? 'opacity-70' : ''
       }`}
       onPointerDown={(event) => {
+        // The slider owns horizontal drags here; don't let a parent's swipe-to-change-image see them.
+        event.stopPropagation();
         dragging.current = true;
         event.currentTarget.setPointerCapture?.(event.pointerId);
         moveTo(event);
       }}
       onPointerMove={(event) => dragging.current && moveTo(event)}
-      onPointerUp={() => (dragging.current = false)}
-      onPointerCancel={() => (dragging.current = false)}
+      onPointerUp={(event) => {
+        event.stopPropagation();
+        dragging.current = false;
+      }}
+      onPointerCancel={(event) => {
+        event.stopPropagation();
+        dragging.current = false;
+      }}
     >
       {/* "After" sets the size; "before" is laid over it and clipped from the right. */}
       <img src={after ?? before} alt="" draggable={false} className="block h-auto w-full" />
@@ -58,7 +66,7 @@ export function Compare({ before, after, busy = false }: CompareProps) {
           src={before}
           alt=""
           draggable={false}
-          className="absolute inset-0 size-full object-fill"
+          className="absolute inset-0 size-full object-contain"
           style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
         />
       )}

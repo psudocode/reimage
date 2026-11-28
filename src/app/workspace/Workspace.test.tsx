@@ -212,6 +212,25 @@ describe('Workspace', () => {
     );
   });
 
+  it('offers every finished image for download from the filmstrip', async () => {
+    const { harness, add } = setup();
+    add(image('a.jpg'), image('b.jpg'));
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    fireEvent.click(apply());
+    const [first, second] = harness.jobs[0]!.images;
+    act(() => {
+      harness.events[0]!.onResult?.(imageResult(first!.id, 400));
+      harness.events[0]!.onResult?.(imageResult(second!.id, 600));
+      harness.finish('done');
+    });
+    const strip = await screen.findByRole('region', { name: 'Images' });
+    const links = within(strip).getAllByRole('link');
+    expect(links.map((link) => link.getAttribute('download'))).toEqual([
+      'a-reimage.jpg',
+      'b-reimage.jpg',
+    ]);
+  });
+
   it('flags results that missed the target or were made smaller to fit', async () => {
     const { harness, add } = setup();
     add(image('a.jpg'));
@@ -519,6 +538,21 @@ describe('Workspace on a phone', () => {
     expect(screen.getByText('2 / 2')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Next image' })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: 'Previous image' }));
+    expect(screen.getByText('1 / 2')).toBeInTheDocument();
+  });
+
+  it('does not change image when the compare slider is dragged', async () => {
+    const { harness, add } = setup();
+    add(image('a.jpg'), image('b.jpg'));
+    await screen.findByRole('radio', { name: /Fixed quality/ });
+    await waitFor(() => expect(harness.previews).toHaveLength(1));
+    await act(async () => harness.previews[0]!.resolve(imageResult('x', 500)));
+    const slider = await screen.findByRole('slider', { name: 'Before and after' });
+    const surface = slider.closest('.touch-none') as HTMLElement;
+    surface.getBoundingClientRect = () => ({ left: 0, width: 400 }) as DOMRect;
+    fireEvent.pointerDown(surface, { clientX: 300, clientY: 100 });
+    fireEvent.pointerMove(surface, { clientX: 100, clientY: 100 });
+    fireEvent.pointerUp(surface, { clientX: 100, clientY: 100 });
     expect(screen.getByText('1 / 2')).toBeInTheDocument();
   });
 

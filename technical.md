@@ -224,7 +224,13 @@ export interface ToolUI<O> {
   icon: IconName; // an SVG from src/ui/Icon.tsx
   Panel: React.ComponentType<{ value: O; onChange(o: O): void }>;
   // Optional interactive layer drawn over the original on the canvas (e.g. the crop box).
-  Overlay?: React.ComponentType<{ value: O; onChange(o: O): void; imageSize: Size }>;
+  // `disabled` is true while a job runs; the overlay must then ignore input.
+  Overlay?: React.ComponentType<{
+    value: O;
+    onChange(o: O): void;
+    imageSize: Size;
+    disabled?: boolean;
+  }>;
 }
 
 export interface ToolContext {
@@ -249,7 +255,7 @@ With no images the app is a drop zone. Once there are images it becomes an edito
 - **Desktop:** category rail (left), tool grid with search, canvas in the middle, an options toolbar with the main action on top, and a filmstrip of images below.
 - **Mobile (< 768 px):** full screen. Top bar (size stats, search, upload, Apply/Download), canvas, options strip, sideways tool chips and a category tab bar. The filmstrip becomes an "n / N" marker with prev/next, swipe on the canvas, and a bottom sheet with the full list.
 - The rail and tool grid are generated from `uiRegistry.ts` (`groupToolsByCategory`); search filters on the translated label.
-- **Main action:** Apply runs the batch with the current tool; once the selected image has a result it turns into a Download link for that file. Changing the tool or its options drops all results, so a stale file can never be downloaded.
+- **Main action:** Apply runs the batch with the current tool; once the selected image has a result it turns into a Download link for that file. Changing the tool or its options drops all results, so a stale file can never be downloaded. This is deliberate: results are only valid for the settings that made them. On desktop each finished thumbnail in the filmstrip has its own download link (a ZIP of the batch is a separate backlog item).
 
 **Live preview.** After the options settle (250 ms debounce) the selected image goes through the same pipeline in the worker pool, but on a copy whose longest side is at most 1024 px (`ProcessRequest.previewMaxEdge`). The original is still decoded under the `limits.ts` pixel guard, so the memory rules are unchanged. The result carries `previewScale`; the UI scales it back up for the "before → ≈after" size and dimensions (bytes ∝ pixels, so `1/scale²`). A target-size budget is scaled down the same way before encoding. These numbers are estimates and are marked "≈"; the real numbers replace them after Apply. Answers that arrive out of order are dropped, previews pause while a job runs, and every preview object URL is revoked when replaced.
 

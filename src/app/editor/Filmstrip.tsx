@@ -65,6 +65,17 @@ export function Filmstrip({
                   </span>
                 )}
               </button>
+              {item.status === 'done' && item.result && (
+                <a
+                  href={item.result.url}
+                  download={item.result.fileName}
+                  aria-label={item.result.fileName}
+                  title={t('editor.download')}
+                  className="absolute -bottom-1 -right-1 flex size-5 items-center justify-center rounded-full bg-violet-600 text-white hover:bg-violet-500"
+                >
+                  <Icon name="download" className="size-3" />
+                </a>
+              )}
               <button
                 type="button"
                 disabled={locked}
