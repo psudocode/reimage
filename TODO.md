@@ -32,6 +32,6 @@
 ## Phase 3: Later
 
 - [ ] Browser-based background removal (ML)
-- [ ] Before/after comparison slider
+- [x] Before/after comparison slider
 - [ ] Images to PDF
 - [ ] Additional languages
