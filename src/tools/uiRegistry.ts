@@ -1,6 +1,7 @@
 import { compressUI } from './compress/ui.ts';
 import { convertUI } from './convert/ui.ts';
 import { cropUI } from './crop/ui.ts';
+import { imagesToPdfUI } from './images-to-pdf/ui.ts';
 import { resizeUI } from './resize/ui.ts';
 import { watermarkUI } from './watermark/ui.ts';
 import { stripMetadataUI } from './strip-metadata/ui.ts';
@@ -16,6 +17,7 @@ const registeredUIs: ToolUI<any>[] = [
   cropUI,
   watermarkUI,
   stripMetadataUI,
+  imagesToPdfUI,
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

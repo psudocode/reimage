@@ -162,6 +162,30 @@
       "errors": {
         "quality": "Quality must be between 1 and 100."
       }
+    },
+    "imagesToPdf": {
+      "label": "Images to PDF",
+      "description": "Combine all your images into one PDF, one image per page. It is built in your browser; nothing is uploaded.",
+      "pageSize": "Page size",
+      "sizes": {
+        "fit": "Fit to image",
+        "a4": "A4",
+        "letter": "Letter"
+      },
+      "margin": "Margin",
+      "margins": {
+        "none": "None",
+        "small": "Small",
+        "large": "Large"
+      },
+      "quality": "Image quality",
+      "qualityHint": "Pages are stored as JPEG. Lower quality makes a smaller PDF.",
+      "orderHint": "Pages follow the order of your images. Remove an image to leave it out.",
+      "errors": {
+        "pageSize": "Choose a page size.",
+        "margin": "Choose a margin.",
+        "quality": "Quality must be between 1 and 100."
+      }
     }
   },
   "categories": {

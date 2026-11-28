@@ -15,6 +15,7 @@ import {
 } from '../../core/job/JobRunner.ts';
 import type { ImageResult, InputImage, Job } from '../../core/pipeline/types.ts';
 import { createImagePool } from '../../core/workers/imagePool.ts';
+import type { CombinePage } from '../../tools/types.ts';
 import { getRegisteredRuntimes, getToolRuntimeById } from '../../tools/runtimeRegistry.ts';
 import { extensionForMime, outputFileName, splitAcceptedFiles, uniqueFileName } from './files.ts';
 import { buildPipeline } from './pipeline.ts';
@@ -61,6 +62,14 @@ function revokeItem(item: WorkspaceItem, deps: WorkspaceDeps) {
   if (item.result) deps.revokeObjectURL(item.result.url);
 }
 
+/** Pages (in the order the user sees them) of a many-to-one run. */
+function orderedPages(items: WorkspaceItem[], parts: Map<string, ImageResult>): CombinePage[] {
+  return items.flatMap((item) => {
+    const part = parts.get(item.id);
+    return part ? [{ blob: part.blob, width: part.width, height: part.height }] : [];
+  });
+}
+
 export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
   const [state, dispatch] = useReducer(workspaceReducer, initialWorkspaceState);
   const [toolId, setToolIdState] = useState(() => getRegisteredRuntimes()[0]!.id);
@@ -84,11 +93,12 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
 
   /** Results were made with the old settings: free them so nothing stale can be downloaded. */
   const invalidateResults = useCallback(() => {
-    const { items, running } = stateRef.current;
+    const { items, running, combined } = stateRef.current;
     if (running || !items.some((item) => item.status === 'done' || item.status === 'failed')) {
       return;
     }
     for (const item of items) if (item.result) depsRef.current.revokeObjectURL(item.result.url);
+    if (combined) depsRef.current.revokeObjectURL(combined.url);
     dispatch({ type: 'invalidate' });
   }, []);
 
@@ -147,22 +157,30 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
     const item = stateRef.current.items.find((candidate) => candidate.id === id);
     if (!item) return;
     revokeItem(item, depsRef.current);
+    const { combined } = stateRef.current;
+    if (combined) depsRef.current.revokeObjectURL(combined.url);
     dispatch({ type: 'remove', id });
   }, []);
 
   const clear = useCallback(() => {
     for (const item of stateRef.current.items) revokeItem(item, depsRef.current);
+    const { combined } = stateRef.current;
+    if (combined) depsRef.current.revokeObjectURL(combined.url);
     dispatch({ type: 'clear' });
   }, []);
 
   const run = useCallback(async () => {
-    const { items, running } = stateRef.current;
+    const { items, running, combined } = stateRef.current;
     if (running || items.length === 0 || errors.length > 0) return;
     const d = depsRef.current;
 
     // Re-running replaces earlier results: free their blobs now.
     for (const item of items) if (item.result) d.revokeObjectURL(item.result.url);
+    if (combined) d.revokeObjectURL(combined.url);
 
+    const tool = getToolRuntimeById(toolId)!;
+    const combine = tool.kind === 'many-to-one' ? tool.combine : undefined;
+    const parts = new Map<string, ImageResult>();
     const pipeline = buildPipeline(toolId, options);
     const images: InputImage[] = items.map((item) => ({
       id: item.id,
@@ -181,6 +199,11 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
       },
       onResult: (result) => {
         if (handleRef.current !== handle) return;
+        if (combine) {
+          parts.set(result.imageId, result);
+          dispatch({ type: 'part', id: result.imageId });
+          return;
+        }
         const fileName = uniqueFileName(
           outputFileName(
             names.get(result.imageId) ?? 'image',
@@ -210,7 +233,30 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
       },
     });
     handleRef.current = handle;
-    await handle.promise;
+    const outcome = await handle.promise;
+    if (combine && outcome.status === 'done' && handleRef.current === handle) {
+      try {
+        const blob = await combine(orderedPages(items, parts), options);
+        // Cancel or a new run may have happened while the file was being built.
+        if (handleRef.current === handle) {
+          dispatch({
+            type: 'combined',
+            result: {
+              url: d.createObjectURL(blob),
+              fileName: outputFileName('images', '{name}.{ext}', extensionForMime(blob.type)),
+              width: 0,
+              height: 0,
+              bytesAfter: blob.size,
+              downscaled: false,
+              targetMissed: false,
+            },
+          });
+        }
+      } catch (cause) {
+        const message = cause instanceof Error ? cause.message : String(cause);
+        for (const item of items) dispatch({ type: 'failure', id: item.id, message });
+      }
+    }
     if (handleRef.current === handle) {
       handleRef.current = null;
       dispatch({ type: 'end' });
@@ -227,6 +273,8 @@ export function useWorkspace(deps: WorkspaceDeps = browserWorkspaceDeps) {
       runnerRef.current?.dispose();
       runnerRef.current = null;
       for (const item of stateRef.current.items) revokeItem(item, depsRef.current);
+      const { combined } = stateRef.current;
+      if (combined) depsRef.current.revokeObjectURL(combined.url);
     },
     [],
   );

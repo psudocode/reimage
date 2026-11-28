@@ -245,6 +245,7 @@ export interface ToolContext {
 - The editor builds its category rail and tool grid from `uiRegistry.ts` (see [Editor UI](#editor-ui-and-live-preview)): a new tool appears there by registering, with no layout code to touch.
 - Output encoding is **not** a tool step. It happens once at the end of the pipeline (see [Codecs](#8-codecs)).
 - Multi-input tools (merge/collage) implement `runMany(inputs: ImageBitmap[], …)` on the `ToolRuntime` and are flagged `kind: 'many-to-one'`.
+- Batch tools that make ONE file (Images to PDF) set `kind: 'many-to-one'` and `combine(pages, options)`. Each image still goes through the worker pool on its own (memory guard, `run`, `toOutput` encode); the workspace then calls `combine` with the encoded pages in list order and offers a single download. `core/pdf/writePdf.ts` writes the PDF by hand (JPEG pages embedded as `DCTDecode`, no extra dependency, no re-compression).
 
 ---
 

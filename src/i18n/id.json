@@ -162,6 +162,30 @@
       "errors": {
         "quality": "Kualitas harus antara 1 dan 100."
       }
+    },
+    "imagesToPdf": {
+      "label": "Gambar ke PDF",
+      "description": "Gabungkan semua gambar jadi satu PDF, satu gambar per halaman. Dibuat di browser kamu; tidak ada yang diunggah.",
+      "pageSize": "Ukuran halaman",
+      "sizes": {
+        "fit": "Sesuai gambar",
+        "a4": "A4",
+        "letter": "Letter"
+      },
+      "margin": "Margin",
+      "margins": {
+        "none": "Tanpa",
+        "small": "Kecil",
+        "large": "Besar"
+      },
+      "quality": "Kualitas gambar",
+      "qualityHint": "Halaman disimpan sebagai JPEG. Kualitas lebih rendah membuat PDF lebih kecil.",
+      "orderHint": "Halaman mengikuti urutan gambar kamu. Hapus gambar untuk tidak menyertakannya.",
+      "errors": {
+        "pageSize": "Pilih ukuran halaman.",
+        "margin": "Pilih margin.",
+        "quality": "Kualitas harus antara 1 dan 100."
+      }
     }
   },
   "categories": {
