@@ -112,7 +112,7 @@ export default function CropPanel({ value, onChange }: ToolPanelProps<CropOption
               />
             </div>
           ))}
-          <p className="text-xs text-slate-500">{t('tools.crop.ratioHint')}</p>
+          <p className="text-xs text-slate-400">{t('tools.crop.ratioHint')}</p>
         </div>
       )}
 
@@ -138,7 +138,7 @@ export default function CropPanel({ value, onChange }: ToolPanelProps<CropOption
               </div>
             ))}
           </div>
-          <p className="text-xs text-slate-500">{t('tools.crop.freeHint')}</p>
+          <p className="text-xs text-slate-400">{t('tools.crop.freeHint')}</p>
         </div>
       )}
 

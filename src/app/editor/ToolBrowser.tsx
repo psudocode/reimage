@@ -107,7 +107,7 @@ export function ToolButtons({
 
   if (tools.length === 0) {
     return (
-      <p role="status" className="px-1 text-sm text-slate-500">
+      <p role="status" className="px-1 text-sm text-slate-400">
         {t('editor.noMatch').replace('{query}', query ?? '')}
       </p>
     );
