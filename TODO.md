@@ -27,7 +27,7 @@
 - [ ] Merge & collage (side by side, stacked, grid)
 - [ ] Watermark (text or logo)
 - [x] Strip metadata (EXIF & GPS)
-- [ ] Pipelines (chain steps + IndexedDB presets via `idb-keyval`)
+- [x] Pipelines (chain steps + IndexedDB presets via `idb-keyval`)
 
 ## Phase 3: Later
 

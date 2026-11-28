@@ -50,6 +50,13 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="m9 12 2 2 4-4" />
     </>
   ),
+  pipeline: (
+    <>
+      <rect x="3" y="3" width="6" height="6" rx="1" />
+      <rect x="15" y="15" width="6" height="6" rx="1" />
+      <path d="M9 6h6a3 3 0 0 1 3 3v6" />
+    </>
+  ),
   upload: (
     <>
       <path d="M12 16V4" />

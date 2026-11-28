@@ -127,11 +127,34 @@
       "errors": {
         "quality": "Quality must be between 1 and 100."
       }
+    },
+    "pipeline": {
+      "label": "Pipelines",
+      "description": "Chain several tools into one run, and save the chain as a preset for next time.",
+      "empty": "No steps yet. Add a tool to start.",
+      "addStep": "Add a step",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "removeStep": "Remove step",
+      "presets": "Presets",
+      "presetsHint": "Saved in this browser only. Nothing is uploaded.",
+      "presetName": "Preset name",
+      "savePreset": "Save",
+      "loadPreset": "Load",
+      "deletePreset": "Delete",
+      "noPresets": "No saved presets yet.",
+      "storageError": "This browser blocked saving presets. Pipelines still work.",
+      "errors": {
+        "empty": "Add at least one step.",
+        "tooMany": "A pipeline can have at most 10 steps.",
+        "unknownTool": "A step uses a tool that is not available."
+      }
     }
   },
   "categories": {
     "transform": "Transform",
-    "export": "Export"
+    "export": "Export",
+    "automate": "Automate"
   },
   "editor": {
     "railLabel": "Tool categories",

@@ -127,11 +127,34 @@
       "errors": {
         "quality": "Kualitas harus antara 1 dan 100."
       }
+    },
+    "pipeline": {
+      "label": "Pipeline",
+      "description": "Rangkai beberapa tool dalam satu proses, lalu simpan rangkaiannya sebagai preset.",
+      "empty": "Belum ada langkah. Tambahkan tool untuk mulai.",
+      "addStep": "Tambah langkah",
+      "moveUp": "Naik",
+      "moveDown": "Turun",
+      "removeStep": "Hapus langkah",
+      "presets": "Preset",
+      "presetsHint": "Disimpan di browser ini saja. Tidak ada yang diunggah.",
+      "presetName": "Nama preset",
+      "savePreset": "Simpan",
+      "loadPreset": "Muat",
+      "deletePreset": "Hapus",
+      "noPresets": "Belum ada preset tersimpan.",
+      "storageError": "Browser ini memblokir penyimpanan preset. Pipeline tetap berfungsi.",
+      "errors": {
+        "empty": "Tambahkan minimal satu langkah.",
+        "tooMany": "Satu pipeline maksimal 10 langkah.",
+        "unknownTool": "Ada langkah yang memakai tool yang tidak tersedia."
+      }
     }
   },
   "categories": {
     "transform": "Ubah",
-    "export": "Ekspor"
+    "export": "Ekspor",
+    "automate": "Otomatis"
   },
   "editor": {
     "railLabel": "Kategori alat",

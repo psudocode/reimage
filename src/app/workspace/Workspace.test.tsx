@@ -143,7 +143,7 @@ describe('Workspace', () => {
       within(rail)
         .getAllByRole('button')
         .map((b) => b.textContent),
-    ).toEqual(['Transform', 'Export']);
+    ).toEqual(['Transform', 'Export', 'Automate']);
     // The active tool (Compress) is filed under Export.
     expect(within(rail).getByRole('button', { name: 'Export' })).toHaveAttribute(
       'aria-current',

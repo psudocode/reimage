@@ -11,6 +11,7 @@ describe('groupToolsByCategory', () => {
     expect(groups.map((g) => [g.id, g.tools.map((tool) => tool.id)])).toEqual([
       ['transform', ['resize', 'crop']],
       ['export', ['compress', 'convert', 'strip-metadata']],
+      ['automate', ['pipeline']],
     ]);
   });
 
@@ -27,7 +28,7 @@ describe('filterTools', () => {
   });
 
   it('returns every tool for a blank query and none for no match', () => {
-    expect(filterTools(getRegisteredUIs(), '', t)).toHaveLength(5);
+    expect(filterTools(getRegisteredUIs(), '', t)).toHaveLength(6);
     expect(filterTools(getRegisteredUIs(), 'zzz', t)).toEqual([]);
   });
 
