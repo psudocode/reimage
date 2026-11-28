@@ -26,7 +26,7 @@
 - [ ] Expand canvas (padding / background color)
 - [ ] Merge & collage (side by side, stacked, grid)
 - [ ] Watermark (text or logo)
-- [ ] Strip metadata (EXIF & GPS)
+- [x] Strip metadata (EXIF & GPS)
 - [ ] Pipelines (chain steps + IndexedDB presets via `idb-keyval`)
 
 ## Phase 3: Later

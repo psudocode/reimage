@@ -115,6 +115,18 @@
         "position": "Position must be between 0 and 100.",
         "edges": "Each edge must be 0 to 99, and opposite edges must leave part of the image."
       }
+    },
+    "stripMetadata": {
+      "label": "Strip metadata",
+      "description": "Remove the hidden data inside a photo before you share it. The picture itself looks the same.",
+      "removesLocation": "GPS location and map coordinates",
+      "removesCamera": "Camera, phone model, lens and date taken",
+      "removesOther": "Embedded thumbnails, XMP and IPTC details",
+      "quality": "Quality",
+      "qualityHint": "JPEG, WebP and AVIF are saved again without the metadata, so a high quality keeps them sharp. PNG stays lossless.",
+      "errors": {
+        "quality": "Quality must be between 1 and 100."
+      }
     }
   },
   "categories": {
